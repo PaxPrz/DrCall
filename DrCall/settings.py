@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'main.apps.MainConfig',
     'patient.apps.PatientConfig',
     'doctor.apps.DoctorConfig',
 ]
@@ -83,8 +84,8 @@ DATABASES = {
         'NAME': 'drcall',
         'USER': os.environ.get('DBUSER'),
         'PASSWORD': os.environ.get('DBPWD'),
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        # 'HOST': '127.0.0.1',
+        # 'PORT': '5432',
     }
 }
 
@@ -121,6 +122,9 @@ USE_L10N = True
 
 USE_TZ = True
 
+# CHANGING DEFAULT USER
+AUTH_USER_MODEL = 'main.User'
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
@@ -132,3 +136,4 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 PROFILE_UPLOAD_PATH = os.path.join(MEDIA_ROOT, 'profile')
+REPORT_IMAGE_PATH = os.path.join(MEDIA_ROOT, 'reports')
