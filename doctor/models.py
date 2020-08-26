@@ -5,11 +5,11 @@ from main.models import User
 # Create your models here.
 class Doctor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    description = models.CharField(max_length=500)
-    contact = models.CharField(max_length=15)
-    speciality = models.ManyToManyField('Specialities')
-    education = models.ManyToManyField('Education')
-    hospital = models.ManyToManyField('Hospital')
+    description = models.CharField(max_length=500, blank=True, null=True)
+    speciality = models.ManyToManyField('Specialities', blank=True)
+    education = models.ManyToManyField('Education', blank=True)
+    rate = models.FloatField(blank=True, default=0)
+    hospital = models.ManyToManyField('Hospital', blank=True)
 
     def __str__(self):
         return '(D):'+self.user.username

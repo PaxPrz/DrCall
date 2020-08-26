@@ -1,0 +1,27 @@
+{% extends 'DrCall/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Home Page
+{% endblock title %}
+
+{% block content %}
+{% comment %} <div class="container" style="width:100%"> {% endcomment %}
+    <div class="d-flex justify-content-center">
+        <h1>Home Page</h1>
+    </div>
+    <hr class="mt-2 mb-3"/>
+    <div class="d-flex justify-content-end" style="background: #aaa; padding-right:15%;">
+        <form method="POST" action="{% url 'main:login' %}">
+            {% csrf_token %}
+            {{ UserLoginForm|crispy }}
+            <button class="btn btn-success" type="submit">Login</button>
+        </form>
+    <div>
+    <div class="row">
+        {% if user.is_authenticated %}
+            <p>You are authenitcated</p>
+        {% endif %}
+    </div>
+{% comment %} </div> {% endcomment %}
+{% endblock content %}

@@ -22,9 +22,9 @@ class Report(models.Model):
     patient = models.ForeignKey('Patient', on_delete=models.CASCADE)
     title = models.CharField(max_length=40)
     date = models.DateTimeField(auto_now_add=True)
-    institute = models.CharField(max_length=50)
+    institute = models.CharField(max_length=50, blank=True, null=True)
     added_by = models.ForeignKey('doctor.Doctor', null=True, on_delete=models.SET_NULL)
-    content = models.CharField(max_length=200)
+    content = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -62,8 +62,8 @@ class Prescription(models.Model):
 
 class Medicine(models.Model):
     name = models.CharField(max_length=100)
-    dose = models.CharField(max_length=50)
-    days = models.IntegerField()
+    dose = models.CharField(max_length=50, blank=True, null=True)
+    days = models.IntegerField(blank=True, null=True)
     prescription = models.ForeignKey('Prescription', on_delete=models.CASCADE)
 
     def __str__(self):

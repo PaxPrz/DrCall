@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'patient.apps.PatientConfig',
     'doctor.apps.DoctorConfig',
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -57,7 +58,7 @@ ROOT_URLCONF = 'DrCall.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'DrCall', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -109,12 +110,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "media")]
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kathmandu'
 
 USE_I18N = True
 
@@ -135,5 +138,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-PROFILE_UPLOAD_PATH = os.path.join(MEDIA_ROOT, 'profile')
-REPORT_IMAGE_PATH = os.path.join(MEDIA_ROOT, 'reports')
+PROFILE_UPLOAD_PATH = './profile/'
+REPORT_IMAGE_PATH = './reports/'
+
+# AUTH REDIRECT VIEW
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = '/login'
+
+# CRISPY FORM BOOTSTRAP
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
