@@ -1,0 +1,12 @@
+{% extends 'patient/base.html' %}
+
+{% load static %}
+{% load dr_tags %}
+
+{% block title %}{{ doctor.user.username }}
+{% endblock title %}
+
+{% block main %}
+    <h1> {{ doctor.user.name }}</h1>
+    <h4> {{ doctor.education.get_queryset|listEducation }} </h4>
+{% endblock main %}

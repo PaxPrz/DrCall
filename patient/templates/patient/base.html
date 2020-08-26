@@ -4,18 +4,24 @@
 <div class="container-fluid">
     <div class="row">
         <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-            <div class="sidebar-sticky pt-3"  style="background: #a2d5f2; height:100%;">
+            <div class="sidebar-sticky pt-3"  style="background: #b0cac7; height:100%;">
         <ul class="nav flex-column">
           <li class="nav-item">
-            <a class="nav-link active" href="{% url 'doctor:dashboard' %}">
+            <a class="nav-link active" href="{% url 'patient:dashboard' %}">
               <span data-feather="home"></span>
               Dashboard <span class="sr-only">(current)</span>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" href="{% url 'doctor:profile' %}">
+            <a class="nav-link active" href="{% url 'patient:profile' %}">
               <span data-feather="home"></span>
               Profile
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#">
+              <span data-feather="home"></span>
+              Search Doctor
             </a>
           </li>
           <li class="nav-item">
@@ -33,7 +39,7 @@
         </ul>
 
         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-          <span>My Patients</span>
+          <span>My Doctors</span>
           <a class="d-flex align-items-center text-muted" href="#" aria-label="Add a new report">
             <span data-feather="plus-circle"></span>
           </a>

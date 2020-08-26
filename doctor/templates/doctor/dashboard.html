@@ -11,138 +11,146 @@
     <h1 class="h2">Dashboard</h1>
 </div>
 <div class="container emp-profile">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="profile-img">
-                    {% if request.user.profile_pic %}
-                        <img src="{% static request.user.profile_pic %}" alt="Profile pic" style="max-width:100%; height:auto;"/>
-                    {% else %}
-                        <img src="{% static '/media/profile/default_profile.jpg' %}" alt="Profile Pic" style="max-width:100%; height:auto;"/>
-                    {% endif %}
-                </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="profile-img">
+                {% if request.user.profile_pic %}
+                    <img src="{% static request.user.profile_pic %}" alt="Profile pic" style="max-width:100%; height:auto;"/>
+                {% else %}
+                    <img src="{% static '/media/profile/default_profile.jpg' %}" alt="Profile Pic" style="max-width:100%; height:auto;"/>
+                {% endif %}
             </div>
-            <div class="col-md-6" style="padding-top:50px;">
-                <div class="profile-head">
-                    <h5>
-                        Dr. {{request.user.name}}
-                    </h5>
-                    <h6>
-                        {{ request.user.doctor.education.get_queryset|listEducation }}
-                    </h6>
-                    <p class="proile-rating">Rating : <span>{{ request.user.doctor.rating_set.all|getRating }}/5</span></p>
-                    <ul class="nav nav-tabs" id="myTab" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">About</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Description</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            {% if request.user.patient %}
-                <div class="col-md-2">
-                    <input type="submit" class="profile-edit-btn btn btn-primary" name="btnAddMore" value="Add Doctor"/>
-                </div>
-            {% endif %}
         </div>
-        <div class="row">
-            <div class="col-md-4" style="padding-top:20px;">
-                <div class="profile-work">
-                    <p style="text-decoration:underline; font-weight:bold;">SPECIALITIES</p>
-                    {% for a,b in request.user.doctor.speciality.get_queryset|listSpeciality %}
-                        <p style="line-height:10px; color:blue;" data-toggle="tooltip" data-placement="bottom" title="{{b}}">{{a}}</p>
-                    {% endfor %}
-                    <p style="text-decoration:underline; font-weight:bold;">HOSPITALS</p>
-                    {% for a,b in request.user.doctor.hospital.get_queryset|listHospital %}
-                        <p style="line-height:10px; color:blue;" data-toggle="tooltip" data-placement="bottom" title="{{b}}">{{a}}</p>
-                    {% endfor %}
-                </div>
+        <div class="col-md-6" style="padding-top:50px;">
+            <div class="profile-head">
+                <h5>
+                    Dr. {{request.user.name}}
+                </h5>
+                <h6>
+                    {{ request.user.doctor.education.get_queryset|listEducation }}
+                </h6>
+                <p class="proile-rating">Rating : <span>{{ request.user.doctor.rating_set.all|getRating }}/5</span></p>
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Description</a>
+                    </li>
+                </ul>
             </div>
-            <div class="col-md-8">
-                <div class="tab-content profile-tab" id="myTabContent">
-                    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label>Username</label>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p>{{ request.user.username }}</p>
-                                    </div>
+        </div>
+        {% if request.user.patient %}
+            <div class="col-md-2">
+                <input type="submit" class="profile-edit-btn btn btn-primary" name="btnAddMore" value="Add Doctor"/>
+            </div>
+        {% endif %}
+    </div>
+    <div class="row">
+        <div class="col-md-4" style="padding-top:20px;">
+            <div class="profile-work">
+                <p style="text-decoration:underline; font-weight:bold;">SPECIALITIES</p>
+                {% for a,b in request.user.doctor.speciality.get_queryset|listSpeciality %}
+                    <p style="line-height:10px; color:blue;" data-toggle="tooltip" data-placement="bottom" title="{{b}}">{{a}}</p>
+                {% endfor %}
+                <p style="text-decoration:underline; font-weight:bold;">HOSPITALS</p>
+                {% for a,b in request.user.doctor.hospital.get_queryset|listHospital %}
+                    <p style="line-height:10px; color:blue;" data-toggle="tooltip" data-placement="bottom" title="{{b}}">{{a}}</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="tab-content profile-tab" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Username</label>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label>Name</label>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p>{{ request.user.name }}</p>
-                                    </div>
+                                <div class="col-md-6">
+                                    <p>{{ request.user.username }}</p>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label>Email</label>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p>{{ request.user.email }}</p>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label>Phone</label>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p>{{ request.user.contact }}</p>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label>Rate</label>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p>Rs.{{ request.user.doctor.rate }} /min </p>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label>Age</label>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p>{{ request.user.dob|getAge }} </p>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label>Location</label>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p>{{ request.user.location }} </p>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label>Gender</label>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p>{{ request.user.gender }} </p>
-                                    </div>
-                                </div>
-                    </div>
-                    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        {{ request.user.doctor.description }}
-                                    </div>
-                                </div>
-                        {% comment %} <div class="row">
-                            <div class="col-md-12">
-                                <label>Your Bio</label><br/>
-                                <p>Your detail description</p>
                             </div>
-                        </div> {% endcomment %}
-                    </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Name</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ request.user.name }}</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Email</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ request.user.email }}</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Phone</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ request.user.contact }}</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Rate</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>Rs.{{ request.user.doctor.rate }} /min </p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Age</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ request.user.dob|getAge }} </p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Location</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ request.user.location }} </p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Gender</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ request.user.gender }} </p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Total Patients</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ request.user.doctor.patient_set.all|length }} </p>
+                                </div>
+                            </div>
+                </div>
+                <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ request.user.doctor.description }}
+                                </div>
+                            </div>
+                    {% comment %} <div class="row">
+                        <div class="col-md-12">
+                            <label>Your Bio</label><br/>
+                            <p>Your detail description</p>
+                        </div>
+                    </div> {% endcomment %}
                 </div>
             </div>
-        </div>   
+        </div>
+    </div>   
 </div>
 
 {% endblock main %}

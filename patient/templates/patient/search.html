@@ -1,0 +1,219 @@
+{% extends 'patient/base.html' %}
+
+{% load static %}
+{% load dr_tags %}
+
+{% block title %}Search Doctor
+{% endblock title %}
+
+{% block css %}
+<style>
+.cart-item {
+  position: relative;
+  margin-bottom: 30px;
+  padding: 0 50px 0 10px;
+  background-color: #fff;
+  box-shadow: 0 12px 20px 1px rgba(64, 64, 64, .09);
+}
+.cart-item .cart-item-label {
+  display: block;
+  margin-bottom: 15px;
+  color: #8c8c8c;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.cart-item .cart-item-product {
+  display: table;
+  width: 420px;
+  text-decoration: none;
+}
+.cart-item .cart-item-product-thumb, .cart-item .cart-item-product-info {
+  display: table-cell;
+  vertical-align: top;
+}
+.cart-item .cart-item-product-thumb {
+  width: 110px;
+}
+.cart-item .cart-item-product-thumb > img {
+  display: block;
+  width: 100%;
+}
+.cart-item .cart-item-product-info {
+  padding-top: 5px;
+  padding-left: 15px;
+}
+.cart-item .cart-item-product-info > span {
+  display: block;
+  margin-bottom: 2px;
+  color: #404040;
+  font-size: 12px;
+}
+.cart-item .cart-item-product-title {
+  margin-bottom: 8px;
+  transition: color, 0.3s;
+  color: #343b43;
+  font-size: 16px;
+  font-weight: bold;
+}
+.cart-item .cart-item-product:hover .cart-item-product-title {
+  color: #ac32e4;
+}
+.cart-item .count-input {
+  display: inline-block;
+  width: 85px;
+}
+.cart-item .remove-item {
+  right: -10px !important;
+}
+@media (max-width: 991px) {
+  .cart-item {
+    padding-right: 30px;
+  }
+  .cart-item .cart-item-product {
+    width: auto;
+  }
+}
+@media (max-width: 768px) {
+  .cart-item {
+    padding-right: 10px;
+    padding-bottom: 15px;
+  }
+  .cart-item .cart-item-product {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  .cart-item .cart-item-product-thumb, .cart-item .cart-item-product-info {
+    display: block;
+  }
+  .cart-item .cart-item-product-thumb {
+    margin: 0 auto 10px;
+  }
+  .cart-item .cart-item-product-info {
+    padding-left: 0;
+  }
+  .cart-item .cart-item-label {
+    margin-bottom: 8px;
+  }
+}
+.comparison-table {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+.comparison-table table {
+  min-width: 750px;
+  table-layout: fixed;
+}
+.comparison-table .comparison-item {
+  position: relative;
+  margin-bottom: 10px;
+  padding: 13px 12px 18px;
+  background-color: #fff;
+  text-align: center;
+  box-shadow: 0 12px 20px 1px rgba(64, 64, 64, .09);
+}
+.comparison-table .comparison-item .comparison-item-thumb {
+  display: block;
+  width: 80px;
+  margin-right: auto;
+  margin-bottom: 12px;
+  margin-left: auto;
+}
+.comparison-table .comparison-item .comparison-item-thumb > img {
+  display: block;
+  width: 100%;
+}
+.comparison-table .comparison-item .comparison-item-title {
+  display: block;
+  margin-bottom: 14px;
+  transition: color 0.25s;
+  color: #404040;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.comparison-table .comparison-item .comparison-item-title:hover {
+  color: #ac32e4;
+}
+.remove-item {
+  display: block;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 22px;
+  height: 22px;
+  padding-left: 1px;
+  border-radius: 50%;
+  background-color: #ff5252;
+  color: #fff;
+  line-height: 23px;
+  text-align: center;
+  box-shadow: 0 3px 12px 0 rgba(255, 82, 82, .5);
+  cursor: pointer;
+}
+.card-wrapper {
+  margin: 30px -15px;
+}
+@media (max-width: 576px) {
+  .card-wrapper .jp-card-container {
+    width: 260px !important;
+  }
+  .card-wrapper .jp-card {
+    min-width: 250px !important;
+  }
+}
+</style>
+{% endblock css %}
+
+{% block main %}
+
+<div class="container">
+    <div class="row" style="padding: 20px 0px;">
+        <div class="col-sm-2">
+        </div>
+        <div class="col-sm-8">
+            <form method="POST" action="{% url 'patient:search' %}">
+                {% csrf_token %}
+                {{form}}
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+        <div class="col-sm-2">
+        </div>
+    </div>
+    <!-- Wishlist-->
+    <div class="row">
+        <div class="col-lg-8 pb-5">
+            <!-- Item-->
+            {% for doctor in doctors %}
+            <div class="cart-item d-md-flex justify-content-between">
+                <div class="px-3 my-3">
+                    <a class="cart-item-product" href="{% url 'patient:doctordetail' doctor.user.slug %}">
+                        <div class="cart-item-product-thumb">
+                            {% if doctor.user.profile_pic %}
+                                <img src="{% static doctor.user.profile_pic %}" alt="Profile Pic">
+                            {% else %}
+                                <img src="{% static '/media/profile/default_profile.jpg' %}" alt="Profile pic">
+                            {% endif %}
+                        </div>
+                        <div class="cart-item-product-info">
+                            <h4 class="cart-item-product-title">Dr. {{ doctor.user.name }}</h4>
+                            <div class="text-lg text-body font-weight-medium pb-1">Rating: {{ doctor.rating_set.all|getRating }}/5</div>
+                            <span>Specialities: <span class="text-success font-weight-medium">
+                                {% for s,_ in doctor.speciality.get_queryset|listSpeciality %}
+                                    <span style="padding: 5px 10px; border-radius:15px; background-color:#b0cac7;">{{s}}</span>
+                                {% endfor %}
+                            </span></span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock main %}
