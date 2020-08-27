@@ -74,6 +74,20 @@ class AppointmentListView(ListView):
             a.save()
         return redirect('doctor:appointments')
 
+class CreateReportView(CreateView):
+    model = Report
+    template_name = 'doctor/create_report.html'
+    form_class = forms.CreateReportForm
+
+    def form_valid(self, form):
+        form.save(pt=get_object_or_404(Patient, user__slug=self.kwargs.get('slug')), dt=self.request.user.doctor)
+        return redirect('doctor:patientdetail', slug=self.kwargs.get('slug'))
+
+class ReportView(DetailView):
+    model = Report
+    template_name = 'doctor/report_detail.html'
+    context_object_name = 'report'
+
 class CreatePrescriptionView(View):
     model = Prescription
     template_name = 'doctor/create_prescription.html'
@@ -91,14 +105,15 @@ class CreatePrescriptionView(View):
             pres = prescriptionForm.save(commit=False)
             pres.doctor = self.request.user.doctor
             pres.patient = get_object_or_404(Patient, user__slug=self.kwargs.get('slug'))
-            pres = pres.save()
-        
-            for medicineDict in medicineFormset.cleaned_data:
+            pres.save()
+            
+            for medForm in medicineFormset.cleaned_data:
                 print("ADDING MEDS")
-                import ipdb;ipdb.set_trace();
-                med = Medicine(medicineDict)
-                med.prescription = pres
-                med.save()
+                name = medForm.get('name')
+                dose = medForm.get('dose', 'unknown')
+                days = medForm.get('days', 0)
+                if name!=None:
+                    Medicine.objects.create(name=name, dose=dose, days=days, prescription=pres)
         else:
             print("PrescriptionErrors: ", prescriptionForm.errors)
             print("MedicineformsetErrors: ", medicineFormset.errors)

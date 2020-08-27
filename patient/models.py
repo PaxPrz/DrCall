@@ -67,7 +67,6 @@ class Prescription(models.Model):
         return self.diagnosis
 
 class Medicine(models.Model):
-    primary = models.IntegerField(primary_key=True, auto_created=True)
     name = models.CharField(max_length=100)
     dose = models.CharField(max_length=50, blank=True, null=True)
     days = models.IntegerField(blank=True, null=True)

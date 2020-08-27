@@ -179,7 +179,7 @@
                                             {% comment %} <div class="row"> {% endcomment %}
                                                 <div class="d-flex flex-row-reversed">
                                                     <div class="p-2">
-                                                        <a href="{% url 'patient:makereport' %}"><button class="btn btn-primary">Add Report</button></a>
+                                                        <a href="{% url 'doctor:makereport' patient.user.slug %}"><button class="btn btn-primary">Add Report</button></a>
                                                     </div>
                                                 </div>
                                             {% comment %} </div> {% endcomment %}
@@ -202,7 +202,7 @@
                                                                         <p class="mb-0 text-black font-weight-bold">
                                                                             <a href="#">
                                                                             </a>
-                                                                            <a class="text-primary" href="{% url 'patient:report' report.id %}">VIEW</a></p>
+                                                                            <a class="text-primary" href="{% url 'doctor:report' report.id %}">VIEW</a></p>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -229,7 +229,7 @@
                                     {% for pres in patient.prescription_set.all %}
                                         <div class="gaadiex-list-item" style="padding-top:10px;">
                                             <h5><a href="#">{{ pres.diagnosis }}</a></h5>
-                                            <h6>Timestamp: {{ pres.date|date:'Y/m/d H:M' }}</h6>
+                                            <h6>Timestamp: {{ pres.date|date:'Y/m/d h:i A' }}</h6>
                                             <p>Prescribed by: Dr.{{pres.doctor.user.name }}</p>
                                         </div>
                                     {% endfor %}
@@ -251,7 +251,7 @@
                                         {% for med in pres.medicine_set.all %}
                                             <div class="gaadiex-list-item" style="padding-top:10px;">
                                                 <h5><a href="#">{{ med.name }}</a></h5>
-                                                <h6>Dose: {{ pres.date|date:'Y/m/d H:M' }}</h6>
+                                                <h6>Dose: {{ pres.date|date:'Y/m/d h:i A' }}</h6>
                                                 <p>Dose/Days: {{ med.dose }} / {{ med.days }}</p>
                                             </div>
                                         {% endfor %}

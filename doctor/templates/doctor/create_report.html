@@ -1,0 +1,28 @@
+{% extends 'doctor/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Create Report
+{% endblock title %}
+
+{% block main %}
+<div class="d-flex justify-content-center">
+    <h1>Create Report</h1>
+</div>
+<hr class="mt-2 mb-3"/>
+<div class="d-flex justify-content-center">
+    <div class="w-50 p-3">
+        <form method="POST" action="." enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|crispy }}
+            {% comment %} {{ reportForm|crispy }}
+            {{ formset.management_form }}
+            {% for form in formset %}
+                {{ form }}
+            {% endfor %} {% endcomment %}
+            <button class="btn btn-success" type="submit">Create</button>
+        </form>
+    </div>
+<div>
+
+{% endblock main %}

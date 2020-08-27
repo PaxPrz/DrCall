@@ -2,7 +2,7 @@ from django import forms
 from .models import Doctor
 from main.models import User
 from django.contrib.auth.forms import UserCreationForm
-from patient.models import Prescription, Medicine
+from patient.models import Prescription, Medicine, Report
 
 class DoctorCreationForm(UserCreationForm):
     
@@ -34,9 +34,33 @@ class DoctorUpdateForm(forms.ModelForm):
         model = Doctor
         fields = ['name','description', 'location', 'dob', 'contact', 'speciality', 'education', 'hospital', 'profile_pic']
 
+class CreateReportForm(forms.ModelForm):
+    content = forms.CharField(widget=forms.Textarea(
+        attrs={
+            'class':'form-control',
+        }
+    ))
+
+    def save(self, pt, dt):
+        r = super(CreateReportForm, self).save(commit=False)
+        r.patient = pt
+        r.added_by = dt
+        r.save()
+        return r
+
+    class Meta:
+        model = Report
+        fields = ['title', 'date', 'institute', 'content', 'image']
+
+
 class PrescriptionForm(forms.ModelForm):
     class Meta:
         model = Prescription
         fields = ['diagnosis']
+
+class MedicineForm(forms.ModelForm):
+    class Meta:
+        model = Medicine
+        fields = ['name','dose','days']
 
 MedicineFormset = forms.modelformset_factory(Medicine, fields=('name','dose','days'), extra=3)
