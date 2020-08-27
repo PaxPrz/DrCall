@@ -1,12 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic import TemplateView, ListView, DetailView, View
 from django.views.generic.edit import CreateView, UpdateView
 from django.forms.models import model_to_dict
 from main.models import User
-from .models import Patient
+from .models import Patient, Rating, Appointment, Report, ReportImage, Prescription, Medicine
 from . import forms
 from doctor.models import Doctor
+import datetime
+from django.forms import modelform_factory
+from django.contrib import messages
 
 # Create your views here.
 class PatientCreationView(CreateView):
@@ -42,7 +45,7 @@ class PatientProfileUpdate(TemplateView):
         form = forms.PatientUpdateForm(data=self.request.POST, files=self.request.FILES, instance=self.request.user)
         if form.is_valid():
             print("PATIENT UPDATE FORM VALID")
-            form.save(user=self.request.user)
+            form.save()
             return redirect('patient:dashboard')
         return render(self.request, self.template_name, {'form':form})
 
@@ -67,7 +70,123 @@ class DoctorDetailView(DetailView):
     model = Doctor
     template_name = 'patient/doctor_detail.html'
     slug_field = 'user__slug'
-    
+    context_object_name = 'doctor'
+
     # def get_object(self):
     #     return get_object_or_404(Doctor, user__slug=self.kwargs['slug'])
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            r = self.request.user.patient.rating.get(doctor=get_object_or_404(Doctor, user__slug=self.kwargs['slug']))
+            rating = r.rating
+        except:
+            rating = 0
+        context["myRating"] = str(rating)
+        return context
+    
 
+    def post(self, *args, **kwargs):
+        if self.request.POST.get('subscribe') == "Add Doctor":
+            self.request.user.patient.allowed_doctor.add(get_object_or_404(Doctor, user__slug=self.kwargs['slug']))
+        elif self.request.POST.get('subscribe') == "Remove Doctor":
+            self.request.user.patient.allowed_doctor.remove(get_object_or_404(Doctor, user__slug=self.kwargs['slug']))
+        if self.request.POST.get('rating') != None:
+            rating = int(self.request.POST.get('rating'))
+            print("RATING: ",rating)
+            if rating < 1:
+                rating = 1
+            if rating > 5:
+                rating = 5
+            try:
+                r = self.request.user.patient.rating.get(doctor=get_object_or_404(Doctor, user__slug=self.kwargs['slug']))
+                r.rating = rating
+                r.save()
+            except:
+                r = Rating.objects.create(doctor=d, rating=rating)
+                self.request.user.patient.rating.add(r)
+        return redirect('patient:doctordetail', slug=self.kwargs['slug'])
+
+class MakeAppointmentView(TemplateView):
+    template_name = 'patient/make_appointment.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["form"] = forms.MakeAppointmentForm()
+        return context
+
+    def post(self, *args, **kwargs):
+        form = forms.MakeAppointmentForm(self.request.POST)
+        if form.is_valid():
+            print("FORM VALID")
+            form.save(pt=self.request.user.patient, dt=get_object_or_404(Doctor, user__slug=self.kwargs.get('slug')))
+            return redirect('patient:appointments')
+        print(self.request.POST.get('appointment_time'))
+        return render(self.request, self.template_name, {'form':form})
+
+class ListAppointmentView(ListView):
+    model = Appointment
+    template_name = 'patient/list_appointments.html'
+    context_object_name = 'appointments'
+
+    def get_queryset(self):
+        return self.request.user.patient.appointment_set.all()
+    
+class ListReportView(ListView):
+    model = Report
+    template_name = 'patient/list_reports.html'
+    context_object_name = 'reports'
+
+    def get_queryset(self):
+        return self.request.user.patient.report_set.all()
+
+
+class CreateReportView(CreateView):
+    model = Report
+    template_name = 'patient/create_report.html'
+    success_url = reverse_lazy('patient:reports')
+    form_class = forms.CreateReportForm
+
+    def form_valid(self, form):
+        form.save(pt=self.request.user.patient)
+        return redirect(self.success_url)
+
+class ReportDetailView(DetailView):
+    model = Report
+    template_name = 'patient/report_detail.html'
+    context_object_name = 'report'
+
+
+# class CreateReportView(View):
+#     model = Report
+#     template_name = 'patient/create_report.html'
+    
+#     def get(self, *args, **kwargs):
+#         ReportImageFormset = modelformset_factory(ReportImage, form=forms.CreateReportImageForm)
+#         reportForm = forms.CreateReportForm(queryset=ReportImage.objects.none())
+#         imageset = ReportImageFormset()
+#         return render(self.request, self.template_name, {'reportForm':reportForm, 'formset':imageset})
+    
+#     def post(self, *args, **kwargs):
+#         ReportImageFormset = modelformset_factory(ReportImage, form=forms.CreateReportImageForm)
+#         reportForm = forms.CreateReportForm(self.request.POST)
+#         imageset = ReportImageFormset(self.request.POST, self.request.FILES)
+#         if reportForm.is_valid() and imageset.is_valid():
+#             report = reportForm.save(commit=False)
+#             report.patient = self.request.user.patient
+#             # report.save()
+
+#             print("imgaset:",imageset.cleaned_data)
+#             for form in imageset.cleaned_data:
+#                 print(type(form))
+#                 image = form.get('image')
+#                 photo = ReportImage(report=report, image=image)
+#                 photo.save()
+#             messages.success(self.request, "Report Created!")
+#         else:
+#             print(reportForm.errors)
+#             print(imageset.errors)
+#             return render(self.request, self.template_name, {'reportForm':reportForm, 'formset':imageset})
+#         return redirect('patient:reports')
+
+    

@@ -46,23 +46,23 @@
         <span class="navbar-toggler-icon"></span>
         </button>
 
-        <ul id="nav-line1" class="navbar-nav">
+        <ul id="nav-line1" class="navbar">
             <li class="nav-item text-nowrap">
-                <a class="nav-link" href="{% url 'main:home' %}">Home <span class="sr-only">(current)</span></a>
+                <a class="nav-link" href="{% url 'main:home' %}" style="color:white;">Home <span class="sr-only">(current)</span></a>
             </li>
             {% if not user.is_authenticated %}
             <li class="nav-item text-nowrap">
-                <a class="nav-link" href="{% url 'doctor:signup' %}">SignUp as Doctor</a>
+                <a class="nav-link" href="{% url 'doctor:signup' %}"  style="color:white;">SignUp as Doctor</a>
             </li>
             <li class="nav-item text-nowrap">
-                <a class="nav-link" href="{% url 'patient:signup' %}">SignUp as Patient</a>
+                <a class="nav-link" href="{% url 'patient:signup' %}" style="color:white;">SignUp as Patient</a>
             </li>
             {% else %}
             <li class="nav-item text-nowrap">
-                <a class="nav-link" href="{% url 'main:logout' %}">Logout</a>
+                <a class="nav-link" href="{% url 'main:logout' %}" style="color:white;">Logout</a>
             </li>
             {% endif %}
-            <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
+            {% comment %} <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search"> {% endcomment %}
             {% comment %} <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Dropdown

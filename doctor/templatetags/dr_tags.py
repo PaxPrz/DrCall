@@ -30,3 +30,16 @@ def getRating(value):
     for v in value:
         rating += v.rating
     return '{:.2f}'.format(rating/len(value))
+
+@register.filter(name='timeCheck')
+def timeCheck(value):
+    now = datetime.datetime.now()
+    if value < now:
+        print("expire")
+        return "Expired"
+    elif value >= now+datetime.timedelta(minutes=5):
+        print("FUTURE")
+        return "Message"
+    else:
+        print("its time")
+        return "Call"

@@ -1,0 +1,27 @@
+{% extends 'patient/base.html' %}
+
+{% load static %}
+
+{% block title %}{{report.title}}
+{% endblock title %}
+
+{% block main %}
+
+<div class="col-md-9">
+    <div class="card hovercard">
+        <div class="cardheader">
+            <h3>{{report.title}}</h3>
+        </div>
+        <div class="info">
+            <p>DATE: <span>{{ report.date|date:'Y/m/d H:M' }}</span></p>
+            <p>INSTITUTE: <span>{{ report.institute }}</span></p>
+            <p>ADDED BY: <span>{{ report.added_by.user.username }}</span></p>
+            <p>CONTENT: <span>{{ report.content }}</span></p>
+            {% if report.image %}
+                <img src="{% static report.image %}" alt="report Image"/>
+            {% endif %}
+        </div>
+    </div>        
+</div>
+
+{% endblock main %}

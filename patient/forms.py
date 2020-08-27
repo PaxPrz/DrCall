@@ -1,6 +1,7 @@
 from django import forms
-from .models import Patient
+from .models import Patient, Appointment, Report, ReportImage, Prescription, Medicine
 from main.models import User
+import datetime
 from django.contrib.auth.forms import UserCreationForm
 
 class PatientCreationForm(UserCreationForm):
@@ -28,3 +29,65 @@ class PatientUpdateForm(forms.ModelForm):
 
 class ProfileSearchForm(forms.Form):
     name = forms.CharField(required=False)
+
+class MakeAppointmentForm(forms.ModelForm):
+    problem = forms.CharField(widget=forms.Textarea(attrs={
+            'width': '50%',
+            'height': '30px',
+    }))
+    appointment_time = forms.DateTimeField(label="Appointment Time", required=True,
+        input_formats=["%m/%d/%Y %I:%M %p",
+            "%m/%d/%Y %H:%M:%S"],
+        widget = forms.DateTimeInput(
+            attrs={
+                'class':'form-control datetimepicker-input',
+                'data-target': '#datetimepicker1',
+            }
+        )
+    )
+
+    def clean_time(self):
+        time = self.cleaned_data['appointment_time']
+        if time <= datetime.datetime.now():
+            raise forms.ValidationError("The date cannot be in the past!")
+        return time
+
+    def save(self, pt, dt, *args):
+        m = super(MakeAppointmentForm, self).save(commit=False)
+        m.patient = pt
+        m.doctor = dt
+        m.save()
+        return m
+
+    class Meta:
+        model = Appointment
+        fields = ['problem', 'appointment_time']
+
+class CreateReportForm(forms.ModelForm):
+    content = forms.CharField(widget=forms.Textarea(
+        attrs={
+            'class':'form-control',
+        }
+    ))
+
+    def save(self, pt):
+        r = super(CreateReportForm, self).save(commit=False)
+        r.patient = pt
+        r.save()
+        return r
+
+    class Meta:
+        model = Report
+        fields = ['title', 'date', 'institute', 'content', 'image']
+
+class CreateReportImageForm(forms.ModelForm):
+    
+    # def save(self, rep):
+    #     i = super(CreateReportImageForm, self).save(commit=False)
+    #     i.report = rep
+    #     i.save()
+    #     return i
+
+    class Meta:
+        model = ReportImage
+        fields = ['image']

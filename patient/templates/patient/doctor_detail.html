@@ -6,7 +6,208 @@
 {% block title %}{{ doctor.user.username }}
 {% endblock title %}
 
+{% block css %}
+<style>
+.rating {
+    float:left;
+    width:300px;
+}
+.rating span { float:right; position:relative; }
+.rating span input {
+    position:absolute;
+    top:0px;
+    left:0px;
+    opacity:0;
+}
+.rating span label {
+    display:inline-block;
+    width:30px;
+    height:30px;
+    text-align:center;
+    color:#FFF;
+    background:#ccc;
+    font-size:30px;
+    margin-right:2px;
+    line-height:30px;
+    border-radius:50%;
+    -webkit-border-radius:50%;
+}
+.rating span:hover ~ span label,
+.rating span:hover label,
+.rating span.checked label,
+.rating span.checked ~ span label {
+    background:#F90;
+    color:#FFF;
+}
+</style>
+{% endblock css %}
+
 {% block main %}
-    <h1> {{ doctor.user.name }}</h1>
-    <h4> {{ doctor.education.get_queryset|listEducation }} </h4>
+<div class="container emp-profile">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="profile-img">
+                {% if doctor.user.profile_pic %}
+                    <img src="{% static doctor.user.profile_pic %}" alt="Profile pic" style="max-width:100%; height:auto;"/>
+                {% else %}
+                    <img src="{% static '/media/profile/default_profile.jpg' %}" alt="Profile Pic" style="max-width:100%; height:auto;"/>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-6" style="padding-top:50px;">
+            <div class="profile-head">
+                <h5>
+                    Dr. {{doctor.user.name}}
+                </h5>
+                <h6>
+                    {{ doctor.education.get_queryset|listEducation }}
+                </h6>
+                <p class="proile-rating">Rating : <span>{{ doctor.rating_set.all|getRating }}/5</span></p>
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Description</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        {% if request.user.patient %}
+            <div class="col-md-2" style="padding-top:20px;">
+                
+                {% if request.user.patient in doctor.patient_set.all %}
+                    <div class="row" style="padding-bottom:10px;">
+                        <a href="{% url 'patient:makeappointment' doctor.user.slug %}"><button class="btn btn-success">Make Appointment</button></a>
+                    </div>
+                    <form method="POST" action=".">
+                        {% csrf_token %}
+                        <div class="row">
+                            <input type="submit" class="profile-edit-btn btn btn-danger" name="subscribe" value="Remove Doctor"/>
+                        </div>
+                        <div class="row" style="padding-top:10px; margin-left:-10px;">
+                            Your Rating:
+                            <div class="rating">
+                                {% for i in '54321'|make_list %}                        
+                                    <span class="{% if i == myRating %}checked{% endif %}"><input type="submit" name="rating" id="str{{i}}" value="{{i}}"><label for="str{{i}}"></label></span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </form>
+                {% else %}
+                <form method="POST" action=".">
+                    {% csrf_token %}
+                    <input type="submit" class="profile-edit-btn btn btn-primary" name="subscribe" value="Add Doctor"/>
+                </form>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="row">
+        <div class="col-md-4" style="padding-top:20px;">
+            <div class="profile-work">
+                <p style="text-decoration:underline; font-weight:bold;">SPECIALITIES</p>
+                {% for a,b in doctor.speciality.get_queryset|listSpeciality %}
+                    <p style="line-height:10px; color:blue; cursor:help;" data-toggle="tooltip" data-placement="bottom" title="{{b}}">{{a}}</p>
+                {% endfor %}
+                <p style="text-decoration:underline; font-weight:bold;">HOSPITALS</p>
+                {% for a,b in doctor.hospital.get_queryset|listHospital %}
+                    <p style="line-height:10px; color:blue; cursor:crosshair;" data-toggle="tooltip" data-placement="bottom" title="{{b}}">{{a}}</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="tab-content profile-tab" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Username</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ doctor.user.username }}</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Name</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ doctor.user.name }}</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Email</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ doctor.user.email }}</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Phone</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ doctor.user.contact }}</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Rate</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>Rs.{{ doctor.rate }} /min </p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Age</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ doctor.user.dob|getAge }} </p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Location</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ doctor.user.location }} </p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Gender</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ doctor.user.gender }} </p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Total Patients</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{ doctor.patient_set.all|length }} </p>
+                                </div>
+                            </div>
+                </div>
+                <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ doctor.description }}
+                                </div>
+                            </div>
+                    {% comment %} <div class="row">
+                        <div class="col-md-12">
+                            <label>Your Bio</label><br/>
+                            <p>Your detail description</p>
+                        </div>
+                    </div> {% endcomment %}
+                </div>
+            </div>
+        </div>
+    </div>   
+</div>
+
 {% endblock main %}

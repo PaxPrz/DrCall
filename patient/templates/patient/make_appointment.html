@@ -1,0 +1,64 @@
+{% extends 'patient/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Make Appointment
+{% endblock title %}
+
+{% block css %}
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/moment.min.js" integrity="sha256-VBLiveTKyUZMEzJd6z2mhfxIqz3ZATCuVMawPZGzIfA=" crossorigin="anonymous"></script>
+
+    <!-- Tempus Dominus Bootstrap 4 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css" integrity="sha256-XPTBwC3SBoWHSmKasAk01c08M6sIA5gF5+sRxqak2Qs=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.min.js" integrity="sha256-z0oKYg6xiLq3yJGsp/LsY9XykbweQlHl42jHv2XTBz4=" crossorigin="anonymous"></script>
+
+{% endblock css %}
+
+{% block main %}
+{% if form.errors %}
+    {% for field in form %}
+        {% for error in field.errors %}
+            <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+        <div class="alert alert-danger">
+            <strong>{{ error|escape }}</strong>
+        </div>
+    {% endfor %}
+{% endif %}
+<div class="row" style="padding: 20px 0px;"></div>
+<h3> Set Appointment </h3>
+
+<form method="POST" action="." enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="fieldWrapper">
+        {{ form.problem.errors }}
+        <label for="{{ form.problem.id_for_label }}">Problem: </label>
+        {{ form.problem }}
+    </div>
+    <div class="fieldWrapper" style="width: 50%; padding: 10px 0px;">
+        {{ form.appointment_time.errors }}
+        <label for="{{ form.appointment_time.id_for_label }}">Appointment Time: </label>
+        <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+            {{ form.appointment_time }}
+            <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-success" type="submit" style="margin:20px; 0px;">Set Appointment</button>
+</form>
+
+{% endblock main %}
+
+{% block script %}
+    <script>
+      $(function () {
+        $("#datetimepicker1").datetimepicker();
+      });
+    </script>
+{% endblock script %}

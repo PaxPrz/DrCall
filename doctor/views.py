@@ -1,11 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView, DetailView, View
 from django.views.generic.edit import CreateView, UpdateView
 from django.forms.models import model_to_dict
 from main.models import User
 from .models import Doctor
 from . import forms
+from patient.models import Patient, Appointment, Report, Medicine, Prescription
 
 # Create your views here.
 class DoctorCreationView(CreateView):
@@ -46,6 +47,64 @@ class DoctorProfileUpdate(TemplateView):
             return redirect('doctor:dashboard')
         return render(self.request, self.template_name, {'form':form})
         
+class PatientDetailView(DetailView):
+    model = Patient
+    template_name = 'doctor/patient_detail.html'
+    context_object_name = 'patient'
+    slug_field = 'user__slug'
+
+class AppointmentListView(ListView):
+    model = Appointment
+    template_name = 'doctor/list_appointments.html'
+    context_object_name = 'appointments'
+    
+    def get_queryset(self):
+        return self.request.user.doctor.appointment_set.all()
+
+    def post(self, *args, **kwargs):
+        action = self.request.POST.get('action')
+        act, key = action.split('-')
+        a = get_object_or_404(Appointment, pk=int(key))
+        if a.doctor == self.request.user.doctor:
+            print("ACT:",act)
+            if act == "ACCEPT":
+                a.accepted = True
+            elif act == "CANCEL":
+                a.accepted = False
+            a.save()
+        return redirect('doctor:appointments')
+
+class CreatePrescriptionView(View):
+    model = Prescription
+    template_name = 'doctor/create_prescription.html'
+
+    def get(self, *args, **kwargs):
+        prescriptionForm = forms.PrescriptionForm()
+        medicineFormset = forms.MedicineFormset(queryset=Medicine.objects.none())
+        return render(self.request, self.template_name, {'prescriptionForm':prescriptionForm, 'medicineFormset':medicineFormset})
+
+    def post(self, *args, **kwargs):
+        prescriptionForm = forms.PrescriptionForm(self.request.POST)
+        medicineFormset = forms.MedicineFormset(self.request.POST, self.request.FILES, queryset=Medicine.objects.none())
+        if prescriptionForm.is_valid() and medicineFormset.is_valid():
+            print("PRES FORM VALID")
+            pres = prescriptionForm.save(commit=False)
+            pres.doctor = self.request.user.doctor
+            pres.patient = get_object_or_404(Patient, user__slug=self.kwargs.get('slug'))
+            pres = pres.save()
+        
+            for medicineDict in medicineFormset.cleaned_data:
+                print("ADDING MEDS")
+                import ipdb;ipdb.set_trace();
+                med = Medicine(medicineDict)
+                med.prescription = pres
+                med.save()
+        else:
+            print("PrescriptionErrors: ", prescriptionForm.errors)
+            print("MedicineformsetErrors: ", medicineFormset.errors)
+            return render(self.request, self.template_name, {'prescriptionForm':prescriptionForm, 'medicineFormset':medicineFormset})
+        return redirect('doctor:patientdetail', slug=self.kwargs.get('slug'))
+                
     
 
 # class DoctorProfileUpdate(UpdateView):

@@ -2,6 +2,7 @@ from django import forms
 from .models import Doctor
 from main.models import User
 from django.contrib.auth.forms import UserCreationForm
+from patient.models import Prescription, Medicine
 
 class DoctorCreationForm(UserCreationForm):
     
@@ -32,3 +33,10 @@ class DoctorUpdateForm(forms.ModelForm):
     class Meta:
         model = Doctor
         fields = ['name','description', 'location', 'dob', 'contact', 'speciality', 'education', 'hospital', 'profile_pic']
+
+class PrescriptionForm(forms.ModelForm):
+    class Meta:
+        model = Prescription
+        fields = ['diagnosis']
+
+MedicineFormset = forms.modelformset_factory(Medicine, fields=('name','dose','days'), extra=3)

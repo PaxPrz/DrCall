@@ -1,0 +1,269 @@
+{% extends 'doctor/base.html' %}
+
+{% load static %}
+{% load dr_tags %}
+
+{% block title %}{{ patient.user.username }}
+{% endblock title %}
+
+{% block css %}
+<style>
+.rating {
+    float:left;
+    width:300px;
+}
+.rating span { float:right; position:relative; }
+.rating span input {
+    position:absolute;
+    top:0px;
+    left:0px;
+    opacity:0;
+}
+.rating span label {
+    display:inline-block;
+    width:30px;
+    height:30px;
+    text-align:center;
+    color:#FFF;
+    background:#ccc;
+    font-size:30px;
+    margin-right:2px;
+    line-height:30px;
+    border-radius:50%;
+    -webkit-border-radius:50%;
+}
+.rating span:hover ~ span label,
+.rating span:hover label,
+.rating span.checked label,
+.rating span.checked ~ span label {
+    background:#F90;
+    color:#FFF;
+}
+
+.profile-img img{
+    max-width: 200px;
+    max-height: 200px;
+    width: auto;
+    height: auto;
+    display: block;
+}
+
+
+
+</style>
+{% endblock css %}
+
+{% block main %}
+<div class="container emp-profile">
+    <div class="row">
+        <div class="col-md-2">
+            <div class="profile-img">
+                {% if patient.user.profile_pic %}
+                    <img src="{% static patient.user.profile_pic %}" alt="Profile pic" style="max-width:100%; height:auto;"/>
+                {% else %}
+                    <img src="{% static '/media/profile/default_patient.jpg' %}" alt="Profile Pic" style="max-width:100%; height:auto;"/>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-8" style="padding-top:50px;">
+            <div class="profile-head">
+                <h5>
+                    {{patient.user.name}}
+                </h5>
+                <h6>
+                    Patient
+                </h6>
+                {% comment %} <p class="proile-rating">Rating : <span>{{ doctor.rating_set.all|getRating }}/5</span></p> {% endcomment %}
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="report-tab" data-toggle="tab" href="#report" role="tab" aria-controls="report" aria-selected="false">Reports</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="prescribe-tab" data-toggle="tab" href="#prescribe" role="tab" aria-controls="prescribe" aria-selected="false">Prescribe</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="medicine-tab" data-toggle="tab" href="#medicine" role="tab" aria-controls="medicine" aria-selected="false">Medicines</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        {% if request.user.patient %}
+            <div class="col-md-2" style="padding-top:20px;">
+            </div>
+        {% endif %}
+    </div>
+    <div class="row">
+        <div class="col-md-2" style="padding-top:20px;">
+            <div class="profile-work">
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="tab-content profile-tab" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Username</label>
+                        </div>
+                        <div class="col-md-6">
+                            <p>{{ patient.user.username }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Name</label>
+                        </div>
+                        <div class="col-md-6">
+                            <p>{{ patient.user.name }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Email</label>
+                        </div>
+                        <div class="col-md-6">
+                            <p>{{ patient.user.email }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Phone</label>
+                        </div>
+                        <div class="col-md-6">
+                            <p>{{ patient.user.contact }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Age</label>
+                        </div>
+                        <div class="col-md-6">
+                            <p>{{ patient.user.dob|getAge }} </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Location</label>
+                        </div>
+                        <div class="col-md-6">
+                            <p>{{ patient.user.location }} </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Gender</label>
+                        </div>
+                        <div class="col-md-6">
+                            <p>{{ patient.user.gender }} </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Doctor Followed</label>
+                        </div>
+                        <div class="col-md-6">
+                            <p>{{ patient.allowed_doctor.all|length }} </p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Reports tab -->
+                <div class="tab-pane fade" id="report" role="tabpanel" aria-labelledby="report-tab">
+                    <div class="row">
+                        {% comment %} <div class="col-md-9"> {% endcomment %}
+                            {% comment %} <div class="col-md-9"> {% endcomment %}
+                                <div class="osahan-account-page-right shadow-sm bg-white p-4 h-100">
+                                    <div class="tab-content" id="myTabContent">
+                                        <div class="tab-pane fade active show" id="payments" role="tabpanel" aria-labelledby="payments-tab">
+                                            {% comment %} <div class="row"> {% endcomment %}
+                                                <div class="d-flex flex-row-reversed">
+                                                    <div class="p-2">
+                                                        <a href="{% url 'patient:makereport' %}"><button class="btn btn-primary">Add Report</button></a>
+                                                    </div>
+                                                </div>
+                                            {% comment %} </div> {% endcomment %}
+                                            <div class="row">
+                                                {% for report in patient.report_set.all %}
+                                                    <div class="col-md-6">
+                                                        <div class="bg-white card payments-item mb-4 shadow-sm">
+                                                            <div class="gold-members p-4">
+                                                                <a href="#">
+                                                                </a>
+                                                                <div class="media">
+                                                                    <div class="media-body">
+                                                                        <a href="#">
+                                                                            <i class="icofont-visa icofont-4x"></i>
+                                                                        </a>
+                                                                            <h6 class="mb-1">{{ report.title }}</h6>
+                                                                            <p style="line-height:5px; padding-top:10px;">REPORT DATE: {{ report.date|date:'d/m/Y' }}</p>
+                                                                            <p style="line-height:5px;">INSTITUTE: {{ report.institute }}</p>
+                                                                            <p style="line-height:5px;">ADDED BY: {{ report.added_by.user.username }}</p>
+                                                                        <p class="mb-0 text-black font-weight-bold">
+                                                                            <a href="#">
+                                                                            </a>
+                                                                            <a class="text-primary" href="{% url 'patient:report' report.id %}">VIEW</a></p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% comment %} </div> {% endcomment %}
+                        {% comment %} </div> {% endcomment %}
+                    </div>
+                </div>
+                <!-- Prescribe Tab -->
+                <div class="tab-pane fade" id="prescribe" role="tabpanel" aria-labelledby="prescribe-tab">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <a href="{% url 'doctor:makeprescription' patient.user.slug %}"><button class="btn btn-primary">Create Prescription</button></a>
+                                </div>
+                                <div class="gaadiex-list" style="padding-left:5%;">
+                                    {% for pres in patient.prescription_set.all %}
+                                        <div class="gaadiex-list-item" style="padding-top:10px;">
+                                            <h5><a href="#">{{ pres.diagnosis }}</a></h5>
+                                            <h6>Timestamp: {{ pres.date|date:'Y/m/d H:M' }}</h6>
+                                            <p>Prescribed by: Dr.{{pres.doctor.user.name }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Medicine Tab -->
+                <div class="tab-pane fade" id="medicine" role="tabpanel" aria-labelledby="medicine-tab">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Recent Medicines</h4>
+                                </div>
+                                <div class="gaadiex-list" style="padding-left:5%;">
+                                    {% for pres in patient.prescription_set.all %}
+                                        {% for med in pres.medicine_set.all %}
+                                            <div class="gaadiex-list-item" style="padding-top:10px;">
+                                                <h5><a href="#">{{ med.name }}</a></h5>
+                                                <h6>Dose: {{ pres.date|date:'Y/m/d H:M' }}</h6>
+                                                <p>Dose/Days: {{ med.dose }} / {{ med.days }}</p>
+                                            </div>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>   
+</div>
+
+{% endblock main %}
