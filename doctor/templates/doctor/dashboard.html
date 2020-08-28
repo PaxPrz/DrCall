@@ -17,7 +17,7 @@
                 {% if request.user.profile_pic %}
                     <img src="{% static request.user.profile_pic %}" alt="Profile pic" style="max-width:100%; height:auto;"/>
                 {% else %}
-                    <img src="{% static '/media/profile/default_profile.jpg' %}" alt="Profile Pic" style="max-width:100%; height:auto;"/>
+                    <img src="{% static '/profile/default_profile.jpg' %}" alt="Profile Pic" style="max-width:100%; height:auto;"/>
                 {% endif %}
             </div>
         </div>
@@ -40,22 +40,20 @@
                 </ul>
             </div>
         </div>
-        {% if request.user.patient %}
             <div class="col-md-2">
-                <input type="submit" class="profile-edit-btn btn btn-primary" name="btnAddMore" value="Add Doctor"/>
+                <h6> Balance: Rs.{{ request.user.balance }} </h6>
             </div>
-        {% endif %}
     </div>
     <div class="row">
         <div class="col-md-4" style="padding-top:20px;">
             <div class="profile-work">
                 <p style="text-decoration:underline; font-weight:bold;">SPECIALITIES</p>
                 {% for a,b in request.user.doctor.speciality.get_queryset|listSpeciality %}
-                    <p style="line-height:10px; color:blue;" data-toggle="tooltip" data-placement="bottom" title="{{b}}">{{a}}</p>
+                    <p style="line-height:10px; color:blue; cursor:help;" data-toggle="tooltip" data-placement="bottom" title="{{b}}">{{a}}</p>
                 {% endfor %}
                 <p style="text-decoration:underline; font-weight:bold;">HOSPITALS</p>
                 {% for a,b in request.user.doctor.hospital.get_queryset|listHospital %}
-                    <p style="line-height:10px; color:blue;" data-toggle="tooltip" data-placement="bottom" title="{{b}}">{{a}}</p>
+                    <p style="line-height:10px; color:blue; cursor:crosshair;" data-toggle="tooltip" data-placement="bottom" title="{{b}}">{{a}}</p>
                 {% endfor %}
             </div>
         </div>

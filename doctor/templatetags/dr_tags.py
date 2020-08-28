@@ -1,5 +1,7 @@
 from django import template
+from django.utils import timezone
 import datetime
+
 
 register = template.Library()
 
@@ -33,13 +35,32 @@ def getRating(value):
 
 @register.filter(name='timeCheck')
 def timeCheck(value):
-    now = datetime.datetime.now()
+    now = timezone.now()
     if value < now:
         print("expire")
         return "Expired"
-    elif value >= now+datetime.timedelta(minutes=5):
+    elif value >= now+timezone.timedelta(minutes=5):
         print("FUTURE")
         return "Message"
     else:
         print("its time")
         return "Call"
+
+@register.filter(name='countMed')
+def countMed(value):
+    count = 0
+    for m in value:
+        count += len(m.medicine_set.all())
+    return str(count)
+
+@register.filter(name='isWithinADay')
+def isWithinADay(value):
+    if value >= timezone.now()-timezone.timedelta(days=1):
+        return True
+    return False
+
+@register.filter(name='isWithinHours')
+def isWithinHours(value, arg):
+    if value >= timezone.now()-timezone.timedelta(hours=int(arg)):
+        return True
+    return False

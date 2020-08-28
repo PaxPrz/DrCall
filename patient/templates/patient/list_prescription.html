@@ -1,0 +1,125 @@
+{% extends 'patient/base.html' %}
+
+{% load dr_tags %}
+
+{% block title %}My Diagnosis
+{% endblock title %}
+
+{% block css %}
+<style>
+.tips-info {
+    width: 70%;
+}
+.crane-listing {
+    margin-bottom: 2.7em;
+    padding: 5%;
+}
+a {
+    color: #337ab7;
+    text-decoration: none;
+}
+span.sticker {
+    background-color: #349e11;
+    color: #FFF;
+    display: block;
+    font-size: 14px;
+    padding: 7px 15px;
+    position: absolute;
+    left: 0px;
+    text-align: right;
+    top: -1px;
+    z-index: 2;
+    line-height: 1;
+    transition: 0.5s all;
+    -webkit-transition: 0.5s all;
+    -moz-transition: 0.5s all;
+    -o-transition: 0.5s all;
+    -ms-transition: 0.5s all;
+}
+.crane-text.size {
+    float: right;
+    width: 90%;
+}
+.crane-text h3 {
+    font-size: 1.4em;
+    color: #333333;
+    font-weight: 400;
+    text-transform: uppercase;
+    margin-bottom: 0.5em;
+}
+
+.crane-text h5 {
+    font-size: 1.1em;
+    color: #333333;
+    font-weight: 600;
+}
+
+.crane-text h6 {
+    font-weight: 400;
+    color: #777;
+    margin-bottom: 1em;
+    font-size: 1em;
+}
+
+ul.p-t li {
+    display: inline-block;
+    margin-right: 15px;
+}
+</style>
+{% endblock css %}
+
+{% block main %}
+
+<div class="container">
+    <div class="row">
+        <h4> Your Diagnosis </p>
+    </div> 
+
+    {% for pres in prescriptions %}
+        <div class="crane-listview-section">
+            <div class="container" style="border: 1px solid #ddd; margin:10px 0px;">
+                <div class="col-md-9">
+                    <div class="crane-listing">
+                        {% if pres.date|isWithinHours:12 %}
+                            <div class="crane-img-size">            
+                                <span class="sticker">NEW</span>
+                            </div>
+                        {% endif %}
+                        <div class="crane-text size ">
+                            <h3>{{ pres.diagnosis }}</h3>
+                            <h5>Date: {{ pres.date|date:'Y/m/d h:i A' }}</h5>
+                            <p class="news">Diagnosed by: Dr. {{ pres.doctor.user.name }}</p>
+                            <h5 style="margin-top:10px;">Medicines</h4>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Dose</th>
+                                    <th scope="col">Days</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for med in pres.medicine_set.all %}
+                                    <tr>
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{ med.name }}</td>
+                                    <td>{{ med.dose }}</td>
+                                    <td>{{ med.days }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>    
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock main %}

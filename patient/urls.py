@@ -13,4 +13,5 @@ urlpatterns = [
     path('reports/', views.ListReportView.as_view(), name="reports"),
     path('makereport/', views.CreateReportView.as_view(), name="makereport"),
     path('report/<int:pk>/', views.ReportDetailView.as_view(), name="report"),
+    path('prescriptions/', views.PrescriptionView.as_view(), name="prescriptions"),
 ]

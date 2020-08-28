@@ -39,6 +39,15 @@
     background:#F90;
     color:#FFF;
 }
+
+.profile-img img{
+    max-width: 300px;
+    max-height: 300px;
+    width: auto;
+    height: auto;
+    display: block;
+}
+
 </style>
 {% endblock css %}
 
@@ -48,9 +57,9 @@
         <div class="col-md-4">
             <div class="profile-img">
                 {% if doctor.user.profile_pic %}
-                    <img src="{% static doctor.user.profile_pic %}" alt="Profile pic" style="max-width:100%; height:auto;"/>
+                    <img src="{% static doctor.user.profile_pic %}" alt="Profile pic"/>
                 {% else %}
-                    <img src="{% static '/media/profile/default_profile.jpg' %}" alt="Profile Pic" style="max-width:100%; height:auto;"/>
+                    <img src="{% static '/profile/default_profile.jpg' %}" alt="Profile Pic"/>
                 {% endif %}
             </div>
         </div>

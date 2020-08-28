@@ -103,7 +103,7 @@ class DoctorDetailView(DetailView):
                 r.rating = rating
                 r.save()
             except:
-                r = Rating.objects.create(doctor=d, rating=rating)
+                r = Rating.objects.create(doctor=get_object_or_404(Doctor, user__slug=self.kwargs['slug']), rating=rating)
                 self.request.user.patient.rating.add(r)
         return redirect('patient:doctordetail', slug=self.kwargs['slug'])
 
@@ -156,6 +156,14 @@ class ReportDetailView(DetailView):
     template_name = 'patient/report_detail.html'
     context_object_name = 'report'
 
+class PrescriptionView(ListView):
+    model = Prescription
+    template_name = 'patient/list_prescription.html'
+    context_object_name = 'prescriptions'
+
+    def get_queryset(self):
+        return self.request.user.patient.prescription_set.all()
+    
 
 # class CreateReportView(View):
 #     model = Report

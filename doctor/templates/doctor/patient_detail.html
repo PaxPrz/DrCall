@@ -59,9 +59,9 @@
         <div class="col-md-2">
             <div class="profile-img">
                 {% if patient.user.profile_pic %}
-                    <img src="{% static patient.user.profile_pic %}" alt="Profile pic" style="max-width:100%; height:auto;"/>
+                    <img src="{% static patient.user.profile_pic %}" alt="Profile pic"/>
                 {% else %}
-                    <img src="{% static '/media/profile/default_patient.jpg' %}" alt="Profile Pic" style="max-width:100%; height:auto;"/>
+                    <img src="{% static '/media/profile/default_patient.jpg' %}" alt="Profile Pic"/>
                 {% endif %}
             </div>
         </div>

@@ -39,30 +39,13 @@
           </a>
         </h6>
         <ul class="nav flex-column mb-2">
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <span data-feather="file-text"></span>
-              Current month
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <span data-feather="file-text"></span>
-              Last quarter
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <span data-feather="file-text"></span>
-              Social engagement
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <span data-feather="file-text"></span>
-              Year-end sale
-            </a>
-          </li>
+          {% for pat in request.user.doctor.patient_set.all %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'doctor:patientdetail' pat.user.slug %}">
+                {{ pat.user.name }}
+              </a>
+            </li>
+          {% endfor %}
         </ul>
       </div>
     </nav>

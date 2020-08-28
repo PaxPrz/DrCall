@@ -37,6 +37,9 @@ class Report(models.Model):
 
     def __str__(self):
         return self.title
+    
+    class Meta:
+        ordering = ['-date']
 
 class ReportImage(models.Model):
     report = models.ForeignKey('Report', on_delete=models.CASCADE)
@@ -54,6 +57,9 @@ class Appointment(models.Model):
     accepted = models.BooleanField(default=False)
     prev_time = models.DateTimeField(default=datetime.datetime.now())
 
+    class Meta:
+        ordering = ['-appointment_time']
+
     def __str__(self):
         return '(A):'+self.time.strftime("%m-%d:%H-%M")
     
@@ -63,6 +69,9 @@ class Prescription(models.Model):
     diagnosis = models.CharField(max_length=50)
     date = models.DateTimeField(default=datetime.datetime.now())
 
+    class Meta:
+        ordering = ['-date']
+
     def __str__(self):
         return self.diagnosis
 
@@ -71,6 +80,9 @@ class Medicine(models.Model):
     dose = models.CharField(max_length=50, blank=True, null=True)
     days = models.IntegerField(blank=True, null=True)
     prescription = models.ForeignKey('Prescription', on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['-prescription__date']
 
     def __str__(self):
         return self.name

@@ -24,6 +24,7 @@ class DoctorUpdateForm(forms.ModelForm):
 
     def save(self, user, *args, **kwargs):
         user.doctor.description = self.cleaned_data['description']
+        user.doctor.rate = self.cleaned_data['rate']
         user.doctor.speciality.set(self.cleaned_data['speciality'])
         user.doctor.education.set(self.cleaned_data['education'])
         user.doctor.hospital.set(self.cleaned_data['hospital'])
@@ -32,7 +33,7 @@ class DoctorUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Doctor
-        fields = ['name','description', 'location', 'dob', 'contact', 'speciality', 'education', 'hospital', 'profile_pic']
+        fields = ['name','description', 'location', 'dob', 'contact', 'speciality', 'education', 'hospital', 'rate', 'profile_pic']
 
 class CreateReportForm(forms.ModelForm):
     content = forms.CharField(widget=forms.Textarea(
