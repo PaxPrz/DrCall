@@ -25,7 +25,7 @@ SECRET_KEY = 'd=z#deg(vjhc!ce=tn9x!1daf4*2ejez#=3^0e7cprcbuz%247'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -148,3 +148,6 @@ LOGIN_URL = '/login'
 
 # CRISPY FORM BOOTSTRAP
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+# FOR NOTIFICATION ENABLE
+NOTIFY = True

@@ -3,13 +3,16 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, DetailView, View
 from django.views.generic.edit import CreateView, UpdateView
 from django.forms.models import model_to_dict
-from main.models import User
+from main.models import User, Notification
 from .models import Patient, Rating, Appointment, Report, ReportImage, Prescription, Medicine
 from . import forms
 from doctor.models import Doctor
 import datetime
 from django.forms import modelform_factory
 from django.contrib import messages
+from django.conf import settings
+from zoomus import ZoomClient
+import os,json
 
 # Create your views here.
 class PatientCreationView(CreateView):
@@ -89,6 +92,11 @@ class DoctorDetailView(DetailView):
     def post(self, *args, **kwargs):
         if self.request.POST.get('subscribe') == "Add Doctor":
             self.request.user.patient.allowed_doctor.add(get_object_or_404(Doctor, user__slug=self.kwargs['slug']))
+            if settings.NOTIFY:
+                Notification.objects.create(
+                    notification = "You have got a new Patient: "+self.request.user.name +".",
+                    user = get_object_or_404(User, slug=self.kwargs.get('slug'))
+                )
         elif self.request.POST.get('subscribe') == "Remove Doctor":
             self.request.user.patient.allowed_doctor.remove(get_object_or_404(Doctor, user__slug=self.kwargs['slug']))
         if self.request.POST.get('rating') != None:
@@ -120,6 +128,11 @@ class MakeAppointmentView(TemplateView):
         if form.is_valid():
             print("FORM VALID")
             form.save(pt=self.request.user.patient, dt=get_object_or_404(Doctor, user__slug=self.kwargs.get('slug')))
+            if settings.NOTIFY:
+                Notification.objects.create(
+                    notification = self.request.user.name + " has SET an appointment with you.",
+                    user = get_object_or_404(User, slug=self.kwargs.get('slug'))
+                )
             return redirect('patient:appointments')
         print(self.request.POST.get('appointment_time'))
         return render(self.request, self.template_name, {'form':form})
@@ -164,6 +177,39 @@ class PrescriptionView(ListView):
     def get_queryset(self):
         return self.request.user.patient.prescription_set.all()
     
+class NotificationListView(ListView):
+    model = Notification
+    template_name = 'patient/list_notification.html'
+    context_object_name = 'notifications'
+
+    def get_queryset(self):
+        return self.request.user.notification_set.all()
+    
+class MakeCall(View):
+    def get(self, *args, **kwargs):
+        pk = int(self.request.GET.get('appid'))
+        a = get_object_or_404(Appointment, id=pk)
+        SUCCESS=False
+        if a.link == "no":
+            client = ZoomClient(os.environ.get('KEY'), os.environ.get('SECRET'))
+            x = client.user.list()
+            if x.status_code==200:
+                c = json.loads(x.content)
+                uid = c['users'][0]['id']
+                m = client.meeting.create(user_id=uid)
+                if m.status_code==201:
+                    j = json.loads(m.content)
+                    a.link = j['start_url']
+                    a.save()
+                    SUCCESS=True
+                    Notification.objects.create(
+                        notification = self.request.user.name+' has started the call. Join ASAP!',
+                        user = a.doctor.user
+                    )
+                    messages.success(self.request, "Call Created! Join to visit Zoom call!")
+        if not SUCCESS:
+            messages.error(self.request, "Couldn't start call! Try again later!")
+        return redirect('patient:appointments')
 
 # class CreateReportView(View):
 #     model = Report

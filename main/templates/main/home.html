@@ -1,17 +1,27 @@
 {% extends 'DrCall/base.html' %}
 
+{% load static %}
 {% load crispy_forms_tags %}
 
 {% block title %}Home Page
 {% endblock title %}
 
+{% block css %}
+<style>
+#bann{
+    background-image: url('{% static 'banner.jpg' %}');
+    padding: 40px 0px;
+}
+</style>
+{% endblock css %}
+
 {% block content %}
 {% comment %} <div class="container" style="width:100%"> {% endcomment %}
     <div class="d-flex justify-content-center">
-        <h1>Home Page</h1>
+        {% comment %} <h1>Home Page</h1> {% endcomment %}
     </div>
     <hr class="mt-2 mb-3"/>
-    <div class="d-flex justify-content-end" style="background: #aaa; padding-right:15%;">
+    <div class="d-flex justify-content-end" id="bann" style="padding-right:15%;">
         <form method="POST" action="{% url 'main:login' %}">
             {% csrf_token %}
             {{ UserLoginForm|crispy }}

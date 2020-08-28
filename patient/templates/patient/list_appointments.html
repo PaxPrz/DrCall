@@ -134,6 +134,18 @@ a:hover{
 {% endblock css %}
 
 {% block main %}
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+            <strong></strong> {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endfor %}
+{% endif %}
+
 <div class="col-md-9">
     <div class="osahan-account-page-right shadow-sm bg-white p-4 h-100">
         <div class="tab-content" id="myTabContent">
@@ -147,7 +159,7 @@ a:hover{
                                 {% if app.doctor.user.profile_pic %}
                                     <img class="mr-4" src="{% static app.doctor.user.profile_pic %}" alt="Profile pic"/>
                                 {% else %}
-                                    <img class="mr-4" src="{% static '/media/profile/default_profile.jpg' %}" alt="Profile Pic"/>
+                                    <img class="mr-4" src="{% static '/profile/default_profile.jpg' %}" alt="Profile Pic"/>
                                 {% endif %}
                             </a>
                             <div class="media-body">
@@ -171,9 +183,17 @@ a:hover{
                                 </p>
                                 <hr>
                                 <div class="float-right">
-                                    <a class="btn btn-sm btn-outline-primary" href="#" onclick="alert('Cannot CANCEL Now');"><i class="icofont-headphone-alt"></i> CANCEL</a>
+                                    {% comment %} <a class="btn btn-sm btn-outline-primary" href="#" onclick="alert('Cannot CANCEL Now');"><i class="icofont-headphone-alt"></i> CANCEL</a> {% endcomment %}
                                     {% if app.appointment_time|timeCheck == "Call" %}
-                                        <a class="btn btn-sm btn-success" href="#"><i class="icofont-refresh"></i> CALL</a>
+                                        {% if app.accepted %}
+                                            {% if app.link == "no" %}
+                                                <a class="btn btn-sm btn-success" href="{% url 'patient:call' %}?appid={{app.id}}"><i class="icofont-refresh"></i> CALL</a>
+                                            {% else %}
+                                                <a class="btn btn-sm btn-success" href="{{app.link}}" target="_blank"><i class="icofont-refresh"></i> JOIN</a>
+                                            {% endif %}
+                                        {% else %}
+                                            <a class="btn btn-sm btn-primary" href="#"><i class="icofont-refresh"></i> MESSAGE</a>
+                                        {% endif %}
                                     {% elif app.appointment_time|timeCheck == "Expired" %}
                                         <a class="btn btn-sm btn-danger" href="#"><i class="icofont-refresh"></i> EXPIRED</a>
                                     {% else %}

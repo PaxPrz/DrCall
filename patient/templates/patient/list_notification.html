@@ -1,0 +1,28 @@
+{% extends 'patient/base.html' %}
+
+{% block title %}Notifications
+{% endblock title %}
+
+{% block main %}
+{% for notif in notifications %}
+    <div class="crane-listview-section">
+        <div class="container">
+            <div class="col-md-9">
+                <div class="crane-listing">
+                    {% comment %} {% if '1' == '2' %}
+                        <div class="crane-img-size">            
+                            <span class="sticker">NEW</span>
+                        </div>
+                    {% endif %} {% endcomment %}
+                    <div class="crane-text size ">
+                        <div class="alert alert-info" role="alert">
+                            {{ notif.date|date:'Y/m/d h:i A' }} - {{ notif.notification }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+{% endfor %}
+{% endblock main %}

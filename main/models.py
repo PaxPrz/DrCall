@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.text import slugify
 from django.conf import settings
 import os, datetime
+from django.utils import timezone
 
 def generate_upload_path(instance, filename):
     print("GENERATE UPLOAD PATH CALLED!")
@@ -31,3 +32,14 @@ class User(AbstractUser):
         self.slug = slugify(self.username)
         super(User, self).save(*args, **kwargs)
     
+class Notification(models.Model):
+    notification = models.CharField(max_length=100)
+    date = models.DateTimeField(default=datetime.datetime.now())
+    seen = models.BooleanField(default=False)
+    user = models.ForeignKey("User", on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['-date']
+    
+    def __str__(self):
+        return self.notification

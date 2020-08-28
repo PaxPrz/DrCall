@@ -3,10 +3,14 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, DetailView, View
 from django.views.generic.edit import CreateView, UpdateView
 from django.forms.models import model_to_dict
-from main.models import User
+from main.models import User, Notification
 from .models import Doctor
 from . import forms
 from patient.models import Patient, Appointment, Report, Medicine, Prescription
+from django.conf import settings
+import json, os
+from django.contrib import messages
+from zoomus import ZoomClient
 
 # Create your views here.
 class DoctorCreationView(CreateView):
@@ -72,6 +76,11 @@ class AppointmentListView(ListView):
             elif act == "CANCEL":
                 a.accepted = False
             a.save()
+            if settings.NOTIFY:
+                Notification.objects.create(
+                    notification = "Dr. " + self.request.user.name + " has " + act + "ED your appointment.",
+                    user = a.patient.user
+                )
         return redirect('doctor:appointments')
 
 class CreateReportView(CreateView):
@@ -81,6 +90,11 @@ class CreateReportView(CreateView):
 
     def form_valid(self, form):
         form.save(pt=get_object_or_404(Patient, user__slug=self.kwargs.get('slug')), dt=self.request.user.doctor)
+        if settings.NOTIFY:
+            Notification.objects.create(
+                notification = "Dr. " + self.request.user.name + " has ADDED a report of yours.",
+                user = get_object_or_404(User, slug=self.kwargs.get('slug'))
+            )
         return redirect('doctor:patientdetail', slug=self.kwargs.get('slug'))
 
 class ReportView(DetailView):
@@ -106,7 +120,12 @@ class CreatePrescriptionView(View):
             pres.doctor = self.request.user.doctor
             pres.patient = get_object_or_404(Patient, user__slug=self.kwargs.get('slug'))
             pres.save()
-            
+            if settings.NOTIFY:
+                Notification.objects.create(
+                    notification = "Dr. " + self.request.user.name + " has DIAGNOSED your condition.",
+                    user = get_object_or_404(User, slug=self.kwargs.get('slug'))
+                )
+
             for medForm in medicineFormset.cleaned_data:
                 print("ADDING MEDS")
                 name = medForm.get('name')
@@ -120,7 +139,40 @@ class CreatePrescriptionView(View):
             return render(self.request, self.template_name, {'prescriptionForm':prescriptionForm, 'medicineFormset':medicineFormset})
         return redirect('doctor:patientdetail', slug=self.kwargs.get('slug'))
                 
-    
+class NotificationListView(ListView):
+    model = Notification
+    template_name = 'doctor/list_notification.html'
+    context_object_name = 'notifications'
+
+    def get_queryset(self):
+        return self.request.user.notification_set.all()
+
+class MakeCall(View):
+    def get(self, *args, **kwargs):
+        pk = int(self.request.GET.get('appid'))
+        a = get_object_or_404(Appointment, id=pk)
+        SUCCESS=False
+        if a.link == "no":
+            client = ZoomClient(os.environ.get('KEY'), os.environ.get('SECRET'))
+            x = client.user.list()
+            if x.status_code==200:
+                c = json.loads(x.content)
+                uid = c['users'][0]['id']
+                m = client.meeting.create(user_id=uid)
+                if m.status_code==201:
+                    j = json.loads(m.content)
+                    a.link = j['start_url']
+                    a.save()
+                    SUCCESS=True
+                    Notification.objects.create(
+                        notification = 'Dr. '+self.request.user.name+' has started the call. Join ASAP!',
+                        user = a.patient.user
+                    )
+                    messages.success(self.request, "Call Created! Join to visit Zoom call!")
+        if not SUCCESS:
+            messages.error(self.request, "Couldn't start call! Try again later!")
+        return redirect('doctor:appointments')
+            
 
 # class DoctorProfileUpdate(UpdateView):
 #     template_name = 'doctor/profile.html'

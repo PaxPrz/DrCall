@@ -134,6 +134,18 @@ a:hover{
 {% endblock css %}
 
 {% block main %}
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+            <strong></strong> {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endfor %}
+{% endif %}
+
 <div class="col-md-9">
     <div class="osahan-account-page-right shadow-sm bg-white p-4 h-100">
         <div class="tab-content" id="myTabContent">
@@ -147,16 +159,16 @@ a:hover{
                                 {% if app.patient.user.profile_pic %}
                                     <img class="mr-4" src="{% static app.patient.user.profile_pic %}" alt="Profile pic"/>
                                 {% else %}
-                                    <img class="mr-4" src="{% static '/media/profile/default_patient.jpg' %}" alt="Profile Pic"/>
+                                    <img class="mr-4" src="{% static '/profile/default_patient.png' %}" alt="Profile Pic"/>
                                 {% endif %}
                             </a>
                             <div class="media-body">
                                 <a href="#">
-                                    <span class="float-right text-info">Scheduled on {{ app.appointment_time|date:'Y-m-d H:i' }} <i class="icofont-check-circled text-success"></i></span>
+                                    <span class="float-right text-info">Scheduled on {{ app.appointment_time|date:'Y-m-d h:i A' }} <i class="icofont-check-circled text-success"></i></span>
                                 </a>
                                 <h6 class="mb-2">
                                     <a href="#"></a>
-                                    <a href="{% url 'doctor:patientdetail' app.patient.user.slug %}" class="text-black">Dr. {{ app.patient.user.name }}</a>
+                                    <a href="{% url 'doctor:patientdetail' app.patient.user.slug %}" class="text-black">{{ app.patient.user.name }}</a>
                                 </h6>
                                 {% comment %} <p class="text-gray mb-1"><i class="icofont-location-arrow"></i> 730 S Mendenhall Rd, Memphis, TN 38117, USA
                                 </p>{% endcomment %}
@@ -171,23 +183,39 @@ a:hover{
                                 </p>
                                 <hr>
                                 <div class="float-right">
-                                    <form method="POST" action="">
-                                        {% csrf_token %}
-                                        {% if app.accepted %}
-                                            <input name="action" value="CANCEL-{{ app.id }}" type="hidden"/>
-                                            <input name="btn" value="CANCEL" class="btn btn-sm btn-outline-danger" type="submit">
-                                        {% else %}
-                                            <input name="action" value="ACCEPT-{{ app.id }}" type="hidden"/>
-                                            <input name="btn" value="ACCEPT" class="btn btn-sm btn-outline-primary" type="submit">
+                                    <div class="row">
+                                        {% if app.appointment_time|timeCheck != "Expired" %}
+                                        <div class="col-md-6">
+                                            <form method="POST" action="">
+                                                {% csrf_token %}
+                                                {% if app.accepted %}
+                                                    <input name="action" value="CANCEL-{{ app.id }}" type="hidden"/>
+                                                    <input name="btn" value="CANCEL" class="btn btn-sm btn-outline-danger" type="submit">
+                                                {% else %}
+                                                    <input name="action" value="ACCEPT-{{ app.id }}" type="hidden"/>
+                                                    <input name="btn" value="ACCEPT" class="btn btn-sm btn-outline-primary" type="submit">
+                                                {% endif %}
+                                            </form>
+                                        </div>
                                         {% endif %}
-                                    </form>
-                                    {% if app.appointment_time|timeCheck == "Call" %}
-                                        <a class="btn btn-sm btn-success" href="#"><i class="icofont-refresh"></i> CALL</a>
-                                    {% elif app.appointment_time|timeCheck == "Expired" %}
-                                        <a class="btn btn-sm btn-danger" href="#"><i class="icofont-refresh"></i> EXPIRED</a>
-                                    {% else %}
-                                        <a class="btn btn-sm btn-primary" href="#"><i class="icofont-refresh"></i> MESSAGE</a>
-                                    {% endif %}
+                                        <div class="col-md-6">
+                                            {% if app.appointment_time|timeCheck == "Call" %}
+                                                {% if app.accepted %}
+                                                    {% if app.link == "no" %}
+                                                        <a class="btn btn-sm btn-success" href="{% url 'doctor:call' %}?appid={{app.id}}"><i class="icofont-refresh"></i> CALL</a>
+                                                    {% else %}
+                                                        <a class="btn btn-sm btn-success" href="{{app.link}}" target="_blank"><i class="icofont-refresh"></i> JOIN</a>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <a class="btn btn-sm btn-primary" href="#"><i class="icofont-refresh"></i> MESSAGE</a>
+                                                {% endif %}
+                                            {% elif app.appointment_time|timeCheck == "Expired" %}
+                                                <a class="btn btn-sm btn-danger" href="#"><i class="icofont-refresh"></i> EXPIRED</a>
+                                            {% else %}
+                                                <a class="btn btn-sm btn-primary" href="#"><i class="icofont-refresh"></i> MESSAGE</a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 </div>
                                 <p class="mb-0 text-black text-primary pt-2"><span class="text-black font-weight-bold"> Total Doctors:</span> {{ app.patient.allowed_doctors.all|length }}
                                 </p>

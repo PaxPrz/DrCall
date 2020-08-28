@@ -32,6 +32,8 @@
 }
 </style>
 
+{% load static %}
+
 {% block css %}
 {% endblock css %}
 </head>
@@ -39,7 +41,7 @@
 {% comment %} <div class="container"> {% endcomment %}
     <nav class="navbar navbar-dark sticky-top bg-primary flex-md-nowrap p-0 shadow">
         <a class="navbar-brand" href="#">
-            <img src="https://freesvg.org/img/1533845191.png" width="30" height="30" class="d-inline-block align-top" alt="" loading="lazy">
+            <img src="{% static '/favicon.png' %}" width="30" height="30" class="d-inline-block align-top" alt="" loading="lazy">
             DrCall
         </a>
         <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,6 +88,9 @@
         {% comment %} </div>
     </div>
 </div> {% endcomment %}
+
+{% block script %}
+{% endblock script %}
 
 </body>
 </html>

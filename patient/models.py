@@ -56,6 +56,7 @@ class Appointment(models.Model):
     time = models.DateTimeField(default=datetime.datetime.now())
     accepted = models.BooleanField(default=False)
     prev_time = models.DateTimeField(default=datetime.datetime.now())
+    link = models.CharField(max_length=800, default="no")
 
     class Meta:
         ordering = ['-appointment_time']

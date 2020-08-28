@@ -14,4 +14,6 @@ urlpatterns = [
     path('makereport/', views.CreateReportView.as_view(), name="makereport"),
     path('report/<int:pk>/', views.ReportDetailView.as_view(), name="report"),
     path('prescriptions/', views.PrescriptionView.as_view(), name="prescriptions"),
+    path('notifications/', views.NotificationListView.as_view(), name="notifications"),
+    path('makecall/', views.MakeCall.as_view(), name='call'),
 ]
