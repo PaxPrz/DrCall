@@ -27,8 +27,15 @@ class PatientUpdateForm(forms.ModelForm):
         model = Patient
         fields = ['name', 'location', 'dob', 'contact', 'profile_pic']
 
+SEARCH_CHOICES = (
+    ('1', 'Name'),
+    ('2', 'Speciality'),
+    ('3', 'Hospital'),
+)
+
 class ProfileSearchForm(forms.Form):
     name = forms.CharField(required=False)
+    choice = forms.ChoiceField(choices=SEARCH_CHOICES, required=True, initial='1')
 
 class MakeAppointmentForm(forms.ModelForm):
     problem = forms.CharField(widget=forms.Textarea(attrs={

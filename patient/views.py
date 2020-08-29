@@ -13,6 +13,7 @@ from django.contrib import messages
 from django.conf import settings
 from zoomus import ZoomClient
 import os,json
+from django.utils import timezone
 
 # Create your views here.
 class PatientCreationView(CreateView):
@@ -69,6 +70,20 @@ class DoctorListView(ListView):
         #     print(self.form.cleaned_data['name'])
         return Doctor.objects.all()
     
+    def post(self, *args, **kwargs):
+        searchForm = forms.ProfileSearchForm(self.request.POST)
+        if searchForm.is_valid():
+            if searchForm.cleaned_data['choice'] == '3':
+                obj = Doctor.objects.filter(hospital__hospital__icontains=searchForm.cleaned_data['name'])
+            elif searchForm.cleaned_data['choice'] == '2':
+                obj = Doctor.objects.filter(speciality__speciality__icontains=searchForm.cleaned_data['name'])
+            else:
+                obj = Doctor.objects.filter(user__name__icontains=searchForm.cleaned_data['name'])
+            return render(self.request, self.template_name, {'form':searchForm, 'doctors':obj})
+        else:
+            return redirect('patient:search')
+
+    
 class DoctorDetailView(DetailView):
     model = Doctor
     template_name = 'patient/doctor_detail.html'
@@ -95,7 +110,8 @@ class DoctorDetailView(DetailView):
             if settings.NOTIFY:
                 Notification.objects.create(
                     notification = "You have got a new Patient: "+self.request.user.name +".",
-                    user = get_object_or_404(User, slug=self.kwargs.get('slug'))
+                    user = get_object_or_404(User, slug=self.kwargs.get('slug')),
+                    date = timezone.now()
                 )
         elif self.request.POST.get('subscribe') == "Remove Doctor":
             self.request.user.patient.allowed_doctor.remove(get_object_or_404(Doctor, user__slug=self.kwargs['slug']))
@@ -131,7 +147,8 @@ class MakeAppointmentView(TemplateView):
             if settings.NOTIFY:
                 Notification.objects.create(
                     notification = self.request.user.name + " has SET an appointment with you.",
-                    user = get_object_or_404(User, slug=self.kwargs.get('slug'))
+                    user = get_object_or_404(User, slug=self.kwargs.get('slug')),
+                    date = timezone.now()
                 )
             return redirect('patient:appointments')
         print(self.request.POST.get('appointment_time'))
@@ -183,7 +200,10 @@ class NotificationListView(ListView):
     context_object_name = 'notifications'
 
     def get_queryset(self):
-        return self.request.user.notification_set.all()
+        qs = self.request.user.notification_set.all()
+        qs.update(seen=True)
+        return qs
+    
     
 class MakeCall(View):
     def get(self, *args, **kwargs):
@@ -204,11 +224,26 @@ class MakeCall(View):
                     SUCCESS=True
                     Notification.objects.create(
                         notification = self.request.user.name+' has started the call. Join ASAP!',
-                        user = a.doctor.user
+                        user = a.doctor.user,
+                        date = timezone.now()
                     )
                     messages.success(self.request, "Call Created! Join to visit Zoom call!")
         if not SUCCESS:
             messages.error(self.request, "Couldn't start call! Try again later!")
+        return redirect('patient:appointments')
+
+class SendMessage(View):
+    def post(self, *args, **kwargs):
+        pk = int(self.request.GET.get('uid'))
+        message = self.request.POST.get('message')
+        doc_user = get_object_or_404(User, id=pk)
+        if settings.NOTIFY:
+            Notification.objects.create(
+                notification = self.request.user.name+' message you: "'+message+'".',
+                user = doc_user,
+                date = timezone.now()
+            )
+        messages.success(self.request, "Text message sent to "+doc_user.name+"!")
         return redirect('patient:appointments')
 
 # class CreateReportView(View):

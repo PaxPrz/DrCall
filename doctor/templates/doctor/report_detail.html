@@ -5,23 +5,32 @@
 {% block title %}{{report.title}}
 {% endblock title %}
 
-{% block main %}
+{% block css %}
+<style>
+.report-image{
+    max-width: 500px;
+    max-height: 500px;
+    width: auto;
+    height:auto;
+    display:block;
+}
+</style>
+{% endblock css %}
 
-<div class="col-md-9">
-    <div class="card hovercard">
-        <div class="cardheader">
-            <h3>{{report.title}}</h3>
-        </div>
-        <div class="info">
-            <p>DATE: <span>{{ report.date|date:'Y/m/d h:i A' }}</span></p>
-            <p>INSTITUTE: <span>{{ report.institute }}</span></p>
-            <p>ADDED BY: <span>{{ report.added_by.user.username }}</span></p>
-            <p>CONTENT: <span>{{ report.content }}</span></p>
-            {% if report.image %}
-                <img src="{% static report.image %}" alt="report Image"/>
-            {% endif %}
-        </div>
-    </div>        
+{% block main %}
+<div class="d-flex justify-content-center">
+    <div class="card col-md-8">
+    <div class="card-body">
+        <h5 class="card-title">{{report.title}}</h5>
+        <p class="card-text">INSTITUTE: <span>{{ report.institute }}</span></p>
+        <p class="card-text">ADDED BY: <span>{{ report.added_by.user.username }}</span></p>
+        <p class="card-text">CONTENT: <span>{{ report.content }}</span></p>
+        <p class="card-text"><small class="text-muted">DATE: <span>{{ report.date|date:'Y/m/d h:i A' }}</small></p>
+    </div>
+    {% if report.image %}
+        <img src="{% static report.image %}" class="bd-placeholder-img card-img-bottom"  alt="report Image"/>
+    {% endif %}
+    </div>
 </div>
 
 {% endblock main %}

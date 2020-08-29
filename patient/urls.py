@@ -16,4 +16,5 @@ urlpatterns = [
     path('prescriptions/', views.PrescriptionView.as_view(), name="prescriptions"),
     path('notifications/', views.NotificationListView.as_view(), name="notifications"),
     path('makecall/', views.MakeCall.as_view(), name='call'),
+    path('sendmessage/', views.SendMessage.as_view(), name='sendmessage'),
 ]

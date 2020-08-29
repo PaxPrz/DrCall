@@ -59,6 +59,14 @@ def isWithinADay(value):
         return True
     return False
 
+@register.filter(name='unseenNotification')
+def unseenNotificaiton(value):
+    count = 0
+    for v in value:
+        if v.seen == False:
+            count +=1
+    return count
+
 @register.filter(name='isWithinHours')
 def isWithinHours(value, arg):
     if value >= timezone.now()-timezone.timedelta(hours=int(arg)):

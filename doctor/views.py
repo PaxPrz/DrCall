@@ -11,6 +11,7 @@ from django.conf import settings
 import json, os
 from django.contrib import messages
 from zoomus import ZoomClient
+from django.utils import timezone
 
 # Create your views here.
 class DoctorCreationView(CreateView):
@@ -79,7 +80,8 @@ class AppointmentListView(ListView):
             if settings.NOTIFY:
                 Notification.objects.create(
                     notification = "Dr. " + self.request.user.name + " has " + act + "ED your appointment.",
-                    user = a.patient.user
+                    user = a.patient.user,
+                    date = timezone.now()
                 )
         return redirect('doctor:appointments')
 
@@ -93,7 +95,8 @@ class CreateReportView(CreateView):
         if settings.NOTIFY:
             Notification.objects.create(
                 notification = "Dr. " + self.request.user.name + " has ADDED a report of yours.",
-                user = get_object_or_404(User, slug=self.kwargs.get('slug'))
+                user = get_object_or_404(User, slug=self.kwargs.get('slug')),
+                date = timezone.now()
             )
         return redirect('doctor:patientdetail', slug=self.kwargs.get('slug'))
 
@@ -119,11 +122,13 @@ class CreatePrescriptionView(View):
             pres = prescriptionForm.save(commit=False)
             pres.doctor = self.request.user.doctor
             pres.patient = get_object_or_404(Patient, user__slug=self.kwargs.get('slug'))
+            pres.date = timezone.now()
             pres.save()
             if settings.NOTIFY:
                 Notification.objects.create(
                     notification = "Dr. " + self.request.user.name + " has DIAGNOSED your condition.",
-                    user = get_object_or_404(User, slug=self.kwargs.get('slug'))
+                    user = get_object_or_404(User, slug=self.kwargs.get('slug')),
+                    date = timezone.now()
                 )
 
             for medForm in medicineFormset.cleaned_data:
@@ -145,7 +150,9 @@ class NotificationListView(ListView):
     context_object_name = 'notifications'
 
     def get_queryset(self):
-        return self.request.user.notification_set.all()
+        qs = self.request.user.notification_set.all()
+        qs.update(seen=True)
+        return qs
 
 class MakeCall(View):
     def get(self, *args, **kwargs):
@@ -164,15 +171,31 @@ class MakeCall(View):
                     a.link = j['start_url']
                     a.save()
                     SUCCESS=True
-                    Notification.objects.create(
-                        notification = 'Dr. '+self.request.user.name+' has started the call. Join ASAP!',
-                        user = a.patient.user
-                    )
+                    if settings.NOTIFY:
+                        Notification.objects.create(
+                            notification = 'Dr. '+self.request.user.name+' has started the call. Join ASAP!',
+                            user = a.patient.user,
+                            date = timezone.now()
+                        )
                     messages.success(self.request, "Call Created! Join to visit Zoom call!")
         if not SUCCESS:
             messages.error(self.request, "Couldn't start call! Try again later!")
         return redirect('doctor:appointments')
-            
+
+class SendMessage(View):
+    def post(self, *args, **kwargs):
+        pk = int(self.request.GET.get('uid'))
+        message = self.request.POST.get('message')
+        pat_user = get_object_or_404(User, id=pk)
+        if settings.NOTIFY:
+            Notification.objects.create(
+                notification = 'Dr. '+self.request.user.name+' message you: "'+message+'".',
+                user = pat_user,
+                date = timezone.now()
+            )
+        messages.success(self.request, "Text message sent to "+pat_user.name+"!")
+        return redirect('doctor:appointments')
+
 
 # class DoctorProfileUpdate(UpdateView):
 #     template_name = 'doctor/profile.html'

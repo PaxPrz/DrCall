@@ -182,6 +182,13 @@ a:hover{
                                 <p class="text-dark">{{ app.problem }}
                                 </p>
                                 <hr>
+                                <div id="msg{{app.id}}" class="row message-box" style="margin:10px 0px;">
+                                    <form method="POST" action="{% url 'doctor:sendmessage' %}?uid={{app.patient.user.id}}">
+                                        {% csrf_token %}
+                                        <input type="text" name="message" placeholder="Enter message here"/>
+                                        <button type="submit" class="btn btn-success">Send</button>
+                                    </form>
+                                </div>
                                 <div class="float-right">
                                     <div class="row">
                                         {% if app.appointment_time|timeCheck != "Expired" %}
@@ -207,12 +214,12 @@ a:hover{
                                                         <a class="btn btn-sm btn-success" href="{{app.link}}" target="_blank"><i class="icofont-refresh"></i> JOIN</a>
                                                     {% endif %}
                                                 {% else %}
-                                                    <a class="btn btn-sm btn-primary" href="#"><i class="icofont-refresh"></i> MESSAGE</a>
+                                                    <a class="btn btn-sm btn-primary" href="#" onclick="$('#msg{{app.id}}').show();"><i class="icofont-refresh"></i> MESSAGE</a>
                                                 {% endif %}
                                             {% elif app.appointment_time|timeCheck == "Expired" %}
                                                 <a class="btn btn-sm btn-danger" href="#"><i class="icofont-refresh"></i> EXPIRED</a>
                                             {% else %}
-                                                <a class="btn btn-sm btn-primary" href="#"><i class="icofont-refresh"></i> MESSAGE</a>
+                                                <a class="btn btn-sm btn-primary" href="#" onclick="$('#msg{{app.id}}').show();"><i class="icofont-refresh"></i> MESSAGE</a>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -229,3 +236,9 @@ a:hover{
     </div>
 </div>
 {% endblock main %}
+
+{% block script %}
+<script>
+$('.message-box').hide();
+</script>
+{% endblock script %}
