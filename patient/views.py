@@ -14,6 +14,8 @@ from django.conf import settings
 from zoomus import ZoomClient
 import os,json
 from django.utils import timezone
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.models import Group
 
 # Create your views here.
 class PatientCreationView(CreateView):
@@ -26,16 +28,22 @@ class PatientCreationView(CreateView):
         print("PATIENT SIGNUP FORM VALID")
         response = super().form_valid(form)
         patient = Patient.objects.create(user=self.object)
+        patient.user.groups.add(Group.objects.get_or_create(name='Patient'))
         return response
 
     def form_invalid(self, form):
         print("PATIENT SIGNUP FORM INVALID")
         return super().form_invalid(form)
 
-class DashBoardView(TemplateView):
+class BeingPatientRequired(UserPassesTestMixin):
+    def test_func(self):
+        g, created = Group.objects.get_or_create(name='Patient') 
+        return g in self.request.user.groups.all()
+
+class DashBoardView(LoginRequiredMixin, BeingPatientRequired, TemplateView):
     template_name = 'patient/dashboard.html'
 
-class PatientProfileUpdate(TemplateView):
+class PatientProfileUpdate(LoginRequiredMixin, BeingPatientRequired, TemplateView):
     template_name = 'patient/profile.html'
 
     def get_context_data(self, **kwargs):
@@ -84,7 +92,7 @@ class DoctorListView(ListView):
             return redirect('patient:search')
 
     
-class DoctorDetailView(DetailView):
+class DoctorDetailView(LoginRequiredMixin, BeingPatientRequired, DetailView):
     model = Doctor
     template_name = 'patient/doctor_detail.html'
     slug_field = 'user__slug'
@@ -131,7 +139,7 @@ class DoctorDetailView(DetailView):
                 self.request.user.patient.rating.add(r)
         return redirect('patient:doctordetail', slug=self.kwargs['slug'])
 
-class MakeAppointmentView(TemplateView):
+class MakeAppointmentView(LoginRequiredMixin, BeingPatientRequired, TemplateView):
     template_name = 'patient/make_appointment.html'
 
     def get_context_data(self, **kwargs):
@@ -154,7 +162,7 @@ class MakeAppointmentView(TemplateView):
         print(self.request.POST.get('appointment_time'))
         return render(self.request, self.template_name, {'form':form})
 
-class ListAppointmentView(ListView):
+class ListAppointmentView(LoginRequiredMixin, BeingPatientRequired, ListView):
     model = Appointment
     template_name = 'patient/list_appointments.html'
     context_object_name = 'appointments'
@@ -162,7 +170,7 @@ class ListAppointmentView(ListView):
     def get_queryset(self):
         return self.request.user.patient.appointment_set.all()
     
-class ListReportView(ListView):
+class ListReportView(LoginRequiredMixin, BeingPatientRequired, ListView):
     model = Report
     template_name = 'patient/list_reports.html'
     context_object_name = 'reports'
@@ -171,7 +179,7 @@ class ListReportView(ListView):
         return self.request.user.patient.report_set.all()
 
 
-class CreateReportView(CreateView):
+class CreateReportView(LoginRequiredMixin, BeingPatientRequired, CreateView):
     model = Report
     template_name = 'patient/create_report.html'
     success_url = reverse_lazy('patient:reports')
@@ -181,12 +189,15 @@ class CreateReportView(CreateView):
         form.save(pt=self.request.user.patient)
         return redirect(self.success_url)
 
-class ReportDetailView(DetailView):
+class ReportDetailView(LoginRequiredMixin, BeingPatientRequired, UserPassesTestMixin, DetailView):
     model = Report
     template_name = 'patient/report_detail.html'
     context_object_name = 'report'
 
-class PrescriptionView(ListView):
+    def test_func(self):
+        return super(ReportDetailView, self).get_object().patient.user == self.request.user
+
+class PrescriptionView(LoginRequiredMixin, BeingPatientRequired, ListView):
     model = Prescription
     template_name = 'patient/list_prescription.html'
     context_object_name = 'prescriptions'
@@ -194,7 +205,7 @@ class PrescriptionView(ListView):
     def get_queryset(self):
         return self.request.user.patient.prescription_set.all()
     
-class NotificationListView(ListView):
+class NotificationListView(LoginRequiredMixin, BeingPatientRequired, ListView):
     model = Notification
     template_name = 'patient/list_notification.html'
     context_object_name = 'notifications'
@@ -205,7 +216,7 @@ class NotificationListView(ListView):
         return qs
     
     
-class MakeCall(View):
+class MakeCall(LoginRequiredMixin, BeingPatientRequired, View):
     def get(self, *args, **kwargs):
         pk = int(self.request.GET.get('appid'))
         a = get_object_or_404(Appointment, id=pk)
@@ -232,7 +243,7 @@ class MakeCall(View):
             messages.error(self.request, "Couldn't start call! Try again later!")
         return redirect('patient:appointments')
 
-class SendMessage(View):
+class SendMessage(LoginRequiredMixin, BeingPatientRequired, View):
     def post(self, *args, **kwargs):
         pk = int(self.request.GET.get('uid'))
         message = self.request.POST.get('message')

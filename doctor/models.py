@@ -13,6 +13,9 @@ class Doctor(models.Model):
 
     def __str__(self):
         return '(D):'+self.user.username
+    
+    class Meta:
+        permissions = [('isDoctor', 'Can open doctor tabs')]
 
 class Specialities(models.Model):
     speciality = models.CharField(max_length=50)

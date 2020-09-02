@@ -13,6 +13,9 @@ class Patient(models.Model):
 
     def __str__(self):
         return '(P)'+self.user.username
+    
+    class Meta:
+        permissions = [('isPatient', 'Can open patient tabs')]
 
 class Rating(models.Model):
     doctor = models.ForeignKey('doctor.Doctor', on_delete=models.CASCADE)

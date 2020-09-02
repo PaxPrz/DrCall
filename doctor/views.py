@@ -12,6 +12,8 @@ import json, os
 from django.contrib import messages
 from zoomus import ZoomClient
 from django.utils import timezone
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.models import Group
 
 # Create your views here.
 class DoctorCreationView(CreateView):
@@ -24,16 +26,23 @@ class DoctorCreationView(CreateView):
         print("FORM VALID")
         response = super().form_valid(form)
         doctor = Doctor.objects.create(user=self.object)
+        doctor.user.groups.add(Group.objects.get_or_create(name='Doctor'))
         return response
 
     def form_invalid(self, form):
         print("FORM INVALID")
         return super().form_invalid(form)
 
-class DashBoardView(TemplateView):
+class BeingDoctorRequired(UserPassesTestMixin):
+    def test_func(self):
+        g, created = Group.objects.get_or_create(name='Doctor')
+        return g in self.request.user.groups.all()
+
+class DashBoardView(LoginRequiredMixin, BeingDoctorRequired, TemplateView):
+
     template_name = 'doctor/dashboard.html'
 
-class DoctorProfileUpdate(TemplateView):
+class DoctorProfileUpdate(LoginRequiredMixin, BeingDoctorRequired, TemplateView):
     template_name = 'doctor/profile.html'
 
     def get_context_data(self, **kwargs):
@@ -52,13 +61,13 @@ class DoctorProfileUpdate(TemplateView):
             return redirect('doctor:dashboard')
         return render(self.request, self.template_name, {'form':form})
         
-class PatientDetailView(DetailView):
+class PatientDetailView(LoginRequiredMixin, BeingDoctorRequired, DetailView):
     model = Patient
     template_name = 'doctor/patient_detail.html'
     context_object_name = 'patient'
     slug_field = 'user__slug'
 
-class AppointmentListView(ListView):
+class AppointmentListView(LoginRequiredMixin, BeingDoctorRequired, ListView):
     model = Appointment
     template_name = 'doctor/list_appointments.html'
     context_object_name = 'appointments'
@@ -85,7 +94,7 @@ class AppointmentListView(ListView):
                 )
         return redirect('doctor:appointments')
 
-class CreateReportView(CreateView):
+class CreateReportView(LoginRequiredMixin, BeingDoctorRequired, CreateView):
     model = Report
     template_name = 'doctor/create_report.html'
     form_class = forms.CreateReportForm
@@ -100,12 +109,15 @@ class CreateReportView(CreateView):
             )
         return redirect('doctor:patientdetail', slug=self.kwargs.get('slug'))
 
-class ReportView(DetailView):
+class ReportView(LoginRequiredMixin, BeingDoctorRequired, UserPassesTestMixin, DetailView):
     model = Report
     template_name = 'doctor/report_detail.html'
     context_object_name = 'report'
 
-class CreatePrescriptionView(View):
+    def test_func(self):
+        return self.request.user.doctor in super(ReportView, self).get_object().patient.allowed_doctor.all()
+
+class CreatePrescriptionView(LoginRequiredMixin, BeingDoctorRequired, View):
     model = Prescription
     template_name = 'doctor/create_prescription.html'
 
@@ -144,7 +156,7 @@ class CreatePrescriptionView(View):
             return render(self.request, self.template_name, {'prescriptionForm':prescriptionForm, 'medicineFormset':medicineFormset})
         return redirect('doctor:patientdetail', slug=self.kwargs.get('slug'))
                 
-class NotificationListView(ListView):
+class NotificationListView(LoginRequiredMixin, BeingDoctorRequired, ListView):
     model = Notification
     template_name = 'doctor/list_notification.html'
     context_object_name = 'notifications'
@@ -154,7 +166,7 @@ class NotificationListView(ListView):
         qs.update(seen=True)
         return qs
 
-class MakeCall(View):
+class MakeCall(LoginRequiredMixin, BeingDoctorRequired, View):
     def get(self, *args, **kwargs):
         pk = int(self.request.GET.get('appid'))
         a = get_object_or_404(Appointment, id=pk)
@@ -182,7 +194,7 @@ class MakeCall(View):
             messages.error(self.request, "Couldn't start call! Try again later!")
         return redirect('doctor:appointments')
 
-class SendMessage(View):
+class SendMessage(LoginRequiredMixin, BeingDoctorRequired, View):
     def post(self, *args, **kwargs):
         pk = int(self.request.GET.get('uid'))
         message = self.request.POST.get('message')
